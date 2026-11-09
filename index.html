@@ -156,6 +156,12 @@ input[type=text]{width:100%;font:600 18px Inter,sans-serif;text-transform:upperc
   <div class="presets" id="presets"></div>
   <div class="savebar" id="saveBar"><input type="text" id="favName" placeholder="Naam, bijv. Benen" maxlength="18" style="text-transform:none"><button class="btn pri" id="favSave" style="width:auto;padding:12px 16px">Bewaar</button><button class="btn" id="favCancel" style="width:auto;padding:12px 14px;margin-top:0">✕</button></div>
   <div class="card" id="steppers"></div>
+  <div class="card pad">
+    <p class="lbl">Teksten &amp; kleuren</p>
+    <div id="looks"></div>
+    <p style="font-size:11px;color:var(--mut);margin:6px 0 8px">Letters, cijfers en ! ? - . / : + ♥ · max. 8 tekens</p>
+    <button class="btn" id="lookReset">Standaard herstellen</button>
+  </div>
 </section>
 
 <!-- ================= BORD ================= -->
@@ -172,12 +178,6 @@ input[type=text]{width:100%;font:600 18px Inter,sans-serif;text-transform:upperc
     <div style="display:flex;gap:8px"><input type="text" id="msg" maxlength="16" value="LETS GO!"><button class="btn pri" id="bMsg" style="width:auto;padding:12px 18px">Tonen</button></div>
     <p class="lbl" style="margin-top:12px">Draaien</p>
     <div class="seg" id="orient"><button class="sel" data-v="0">0°</button><button data-v="1">90°</button><button data-v="2">180°</button><button data-v="3">270°</button></div>
-  </div>
-  <div class="card pad">
-    <p class="lbl">Teksten &amp; kleuren</p>
-    <div id="looks"></div>
-    <p style="font-size:11px;color:var(--mut);margin:6px 0 8px">Letters, cijfers en ! ? - . / : + ♥ · max. 8 tekens</p>
-    <button class="btn" id="lookReset">Standaard herstellen</button>
   </div>
   <div class="card">
     <div class="row"><div>Geluid<small>Piepjes bij 3-2-1 en faseswitch</small></div><label class="sw-t"><input type="checkbox" id="optSound" checked><span></span></label></div>
@@ -214,12 +214,7 @@ applyLook();
 const DEF={prep:10,work:20,rest:10,rounds:8,sets:1,setrest:60};
 const KEYS=Object.keys(DEF);
 let cfg=Object.assign({},DEF,store.get('cfg',{}));
-const PRESETS=[
-  {n:'Klassiek',c:{prep:10,work:20,rest:10,rounds:8,sets:1,setrest:60}},
-  {n:'Starter',c:{prep:10,work:15,rest:15,rounds:8,sets:1,setrest:60}},
-  {n:'Pittig',c:{prep:10,work:30,rest:15,rounds:8,sets:1,setrest:60}},
-  {n:'Dubbel',c:{prep:10,work:20,rest:10,rounds:8,sets:2,setrest:60}},
-];
+const PRESETS=[];
 let favs=store.get('favs',[]);
 const STEPS=[
   {k:'prep',t:'Voorbereiding',c:'--prep',min:0,max:60,st:5,s:true},
@@ -231,22 +226,22 @@ const STEPS=[
 ];
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const desc=c=>`${c.work}s / ${c.rest}s · ${c.rounds} rondes`+(c.sets>1?` · ${c.sets} sets`:'');
-const same=c=>KEYS.every(k=>cfg[k]===c[k]);
+const same=p=>KEYS.every(k=>cfg[k]===p.c[k])&&(!p.l||Object.keys(LOOK_DEF).every(k=>p.l[k]&&p.l[k].t===look[k].t&&p.l[k].c===look[k].c));
 function renderPlan(){
   const box=$('presets');box.innerHTML='';
   const add=(p,i)=>{
-    const b=document.createElement('div');b.className='preset'+(same(p.c)?' sel':'')+(i!=null?' mine':'');
+    const b=document.createElement('div');b.className='preset'+(same(p)?' sel':'')+(i!=null?' mine':'');
     b.innerHTML=`<b>${esc(p.n)}</b><span>${desc(p.c)}</span>`+(i!=null?'<button class="del" aria-label="Verwijder">×</button>':'');
     b.onclick=e=>{
       if(e.target.classList.contains('del')){favs.splice(i,1);store.set('favs',favs);renderPlan();toast('Favoriet verwijderd');return}
       if(running)return toast('Stop eerst de timer');
-      Object.assign(cfg,p.c);saveCfg();toast(p.n+' gekozen');
+      Object.assign(cfg,p.c);if(p.l){for(const k in look)if(p.l[k])look[k]={t:p.l[k].t,c:p.l[k].c};store.set('look',look);applyLook();renderLooks()}saveCfg();toast(p.n+' gekozen');
     };
     box.appendChild(b);
   };
   favs.forEach((p,i)=>add(p,i));
   PRESETS.forEach(p=>add(p,null));
-  const plus=document.createElement('div');plus.className='preset add';plus.innerHTML='<b>＋</b><span>Huidige opslaan</span>';
+  const plus=document.createElement('div');plus.className='preset add';plus.innerHTML='<b>＋</b><span>Training opslaan</span>';
   plus.onclick=()=>{$('saveBar').classList.add('show');$('favName').focus()};
   box.insertBefore(plus,box.firstChild);
   $('steppers').innerHTML='';
@@ -262,10 +257,10 @@ function renderPlan(){
 }
 function saveFav(){
   const n=$('favName').value.trim();if(!n)return toast('Geef je training een naam');
-  const c={};KEYS.forEach(k=>c[k]=cfg[k]);
+  const c={};KEYS.forEach(k=>c[k]=cfg[k]);const l=JSON.parse(JSON.stringify(look));
   const ex=favs.findIndex(f=>f.n.toLowerCase()===n.toLowerCase());
-  if(ex>=0)favs[ex]={n,c};else favs.unshift({n,c});
-  store.set('favs',favs);$('favName').value='';$('saveBar').classList.remove('show');$('favName').blur();renderPlan();toast('⭐ '+n+' opgeslagen');
+  if(ex>=0)favs[ex]={n,c,l};else favs.unshift({n,c,l});
+  store.set('favs',favs);$('favName').value='';$('saveBar').classList.remove('show');$('favName').blur();renderPlan();toast(ex>=0?'⭐ '+n+' bijgewerkt':'⭐ '+n+' opgeslagen');
 }
 function hold(el,fn){let t,i;const stop=()=>{clearTimeout(t);clearInterval(i)};el.addEventListener('pointerdown',e=>{e.preventDefault();fn();t=setTimeout(()=>i=setInterval(fn,90),400)});['pointerup','pointerleave','pointercancel'].forEach(ev=>el.addEventListener(ev,stop))}
 function saveCfg(){store.set('cfg',cfg);renderPlan();resetTimer()}
@@ -502,7 +497,7 @@ async function pump(){sending=true;while(pending&&chW){const f=pending;pending=n
 /* ============ wiring ============ */
 $('bPlay').onclick=()=>running?pause():start();
 $('favSave').onclick=saveFav;
-function saveLook(){store.set('look',look);applyLook();lastKey='';render()}
+function saveLook(){store.set('look',look);applyLook();lastKey='';render();renderPlan()}
 function previewLook(k){if(running)return;const sg={round:3,set:1};const f=k==='done'?boardFrame('done',0,1,{},false):boardFrame(k==='pause'?'work':k,15,.5,sg,k==='pause');drawLED(f);queueBoard(f)}
 function renderLooks(){
   const box=$('looks');box.innerHTML='';
