@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#07080b">
+<title>Tabata LED</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07080b;--card:#111318;--card2:#171a21;--line:#22262f;--txt:#f3f5f8;--mut:#7d8492;
+  --work:#ff3b2f;--rest:#22e07a;--prep:#ffcc00;--setrest:#2ea8ff;--done:#c6ff00;
+  --phase:var(--done);
+  --cond:"Barlow Condensed","SF Pro Display",-apple-system,system-ui,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font:15px/1.4 Inter,-apple-system,system-ui,sans-serif}
+body{padding:calc(env(safe-area-inset-top) + 10px) 18px calc(env(safe-area-inset-bottom) + 92px);overflow-x:hidden}
+body::before{content:"";position:fixed;inset:-20%;background:radial-gradient(60% 45% at 50% 30%,color-mix(in srgb,var(--phase) 22%,transparent),transparent 70%);transition:background .6s;z-index:-1;pointer-events:none}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+button:active{transform:scale(.96)}
+
+/* top bar */
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.brand{font-family:var(--cond);font-weight:800;font-size:26px;letter-spacing:1.5px;text-transform:uppercase;font-style:italic}
+.brand i{color:var(--phase);font-style:italic;transition:color .4s}
+.pill{display:flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 13px;font-size:13px;font-weight:600}
+.pill .d{width:8px;height:8px;border-radius:50%;background:#555}
+.pill.on .d{background:var(--rest);box-shadow:0 0 10px var(--rest)}
+
+.view{display:none}.view.act{display:block;animation:fade .25s}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* timer */
+.ringwrap{position:relative;width:min(84vw,340px);aspect-ratio:1;margin:8px auto 0}
+.ringwrap svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring-bg{stroke:#1a1d24}
+.ring-fg{stroke:var(--phase);stroke-linecap:round;transition:stroke .4s;filter:drop-shadow(0 0 10px color-mix(in srgb,var(--phase) 60%,transparent))}
+.center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.phase{font-family:var(--cond);font-weight:800;font-size:28px;letter-spacing:4px;text-transform:uppercase;color:var(--phase);transition:color .4s}
+.secs{font-family:var(--cond);font-weight:800;font-size:min(34vw,140px);line-height:.9;font-variant-numeric:tabular-nums;letter-spacing:-2px}
+.sub{font-size:13px;color:var(--mut);font-weight:500;letter-spacing:.5px;margin-top:4px}
+
+.rounds{display:flex;justify-content:center;gap:6px;margin:18px 0 6px;flex-wrap:wrap}
+.rounds i{width:26px;height:6px;border-radius:3px;background:#20232b;transition:background .3s}
+.rounds i.done{background:var(--phase)}
+.rounds i.cur{background:color-mix(in srgb,var(--phase) 45%,#20232b)}
+.meta{display:flex;justify-content:space-between;margin:14px 4px 0}
+.meta div{text-align:center;flex:1}
+.meta b{display:block;font-family:var(--cond);font-size:26px;font-weight:700;font-variant-numeric:tabular-nums}
+.meta span{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:1.2px}
+
+.controls{display:flex;align-items:center;justify-content:center;gap:26px;margin-top:20px}
+.cbtn{width:58px;height:58px;border-radius:50%;background:var(--card);border:1px solid var(--line);display:grid;place-items:center}
+.cbtn svg{width:22px;height:22px;fill:var(--txt)}
+.play{width:88px;height:88px;border-radius:50%;background:var(--phase);display:grid;place-items:center;box-shadow:0 10px 40px color-mix(in srgb,var(--phase) 45%,transparent);transition:background .4s,box-shadow .4s}
+.play svg{width:34px;height:34px;fill:#07080b}
+
+.ledcard{margin-top:22px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px}
+.ledcard .h{display:flex;justify-content:space-between;font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:8px}
+#led{width:100%;display:block;border-radius:8px;background:#000}
+
+/* cards / settings */
+.title{font-family:var(--cond);font-weight:800;font-size:34px;text-transform:uppercase;letter-spacing:.5px;margin:6px 0 14px;font-style:italic}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:6px 16px;margin-bottom:14px}
+.card.pad{padding:16px}
+.lbl{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:1.4px;margin:0 0 10px;font-weight:600}
+.stepper{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line)}
+.stepper:last-child{border-bottom:0}
+.stepper .n{display:flex;align-items:center;gap:12px}
+.stepper .sw{width:10px;height:10px;border-radius:3px}
+.stepper .t{font-weight:600}
+.stepper .ctl{display:flex;align-items:center;gap:6px}
+.stepper .ctl button{width:38px;height:38px;border-radius:11px;background:var(--card2);border:1px solid var(--line);font-size:20px;font-weight:600;display:grid;place-items:center}
+.stepper .v{font-family:var(--cond);font-weight:700;font-size:24px;min-width:58px;text-align:center;font-variant-numeric:tabular-nums}
+.presets{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.preset{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;text-align:left}
+.preset b{display:block;font-family:var(--cond);font-size:22px;font-weight:800;text-transform:uppercase;font-style:italic}
+.preset span{font-size:12px;color:var(--mut)}
+.preset.sel{border-color:var(--phase);box-shadow:inset 0 0 0 1px var(--phase)}
+.total{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:var(--card2);border-radius:14px;margin-bottom:14px}
+.total b{font-family:var(--cond);font-size:28px;font-weight:800}
+.row{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.row small{display:block;color:var(--mut);font-size:12px}
+.sw-t{position:relative;width:50px;height:30px;flex:none}
+.sw-t input{opacity:0;width:0;height:0}
+.sw-t span{position:absolute;inset:0;background:#2a2e38;border-radius:999px;transition:.2s}
+.sw-t span::after{content:"";position:absolute;left:3px;top:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:.2s}
+.sw-t input:checked+span{background:var(--rest)}
+.sw-t input:checked+span::after{transform:translateX(20px)}
+.btn{width:100%;padding:15px;border-radius:14px;font-weight:700;font-size:16px;background:var(--card2);border:1px solid var(--line)}
+.btn.pri{background:var(--txt);color:#07080b;border:0}
+.btn+.btn{margin-top:10px}
+input[type=range]{width:100%;accent-color:var(--txt);margin:6px 0 4px}
+input[type=text]{width:100%;font:600 18px Inter,sans-serif;text-transform:uppercase;background:var(--card2);color:var(--txt);border:1px solid var(--line);border-radius:12px;padding:13px;user-select:text;-webkit-user-select:text}
+.seg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;background:var(--card2);padding:4px;border-radius:12px}
+.seg button{padding:9px 0;border-radius:9px;font-weight:600;font-size:13px;color:var(--mut)}
+.seg button.sel{background:var(--txt);color:#07080b}
+.warn{background:#1d1608;border:1px solid #4d3a10;color:#ffd77a;border-radius:16px;padding:14px;font-size:14px;margin:10px 0 14px}
+.warn b{color:#fff}
+
+/* tabbar */
+.tabs{position:fixed;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom) + 10px);background:rgba(17,19,24,.88);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid var(--line);border-radius:22px;display:flex;padding:6px;z-index:5}
+.tabs button{flex:1;padding:9px 0 7px;border-radius:16px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:600;color:var(--mut)}
+.tabs svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.tabs button.act{color:var(--txt);background:#1e2129}
+.toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 8px);transform:translate(-50%,-140%);background:#1b1e26;border:1px solid var(--line);padding:10px 16px;border-radius:14px;font-size:14px;font-weight:500;transition:transform .3s;z-index:10;white-space:nowrap}
+.toast.show{transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="brand">Tabata<i>.</i></div>
+  <button class="pill" id="pill"><i class="d"></i><span id="pillTxt">LED-bord</span></button>
+</div>
+
+<div class="warn" id="noBle" style="display:none">
+  <b>Bluetooth is hier niet beschikbaar.</b> Safari en Chrome op iPhone geven websites geen toegang tot Bluetooth. Open deze pagina in de gratis app <b>Bluefy – Web BLE Browser</b>. De timer zelf werkt overal.
+</div>
+
+<!-- ================= TIMER ================= -->
+<section class="view act" id="v-timer">
+  <div class="ringwrap">
+    <svg viewBox="0 0 300 300"><circle class="ring-bg" cx="150" cy="150" r="136" fill="none" stroke-width="12"/><circle class="ring-fg" id="ring" cx="150" cy="150" r="136" fill="none" stroke-width="12" stroke-dasharray="854.5" stroke-dashoffset="0"/></svg>
+    <div class="center">
+      <div class="phase" id="phase">Klaar</div>
+      <div class="secs" id="secs">0:00</div>
+      <div class="sub" id="sub">Druk op start</div>
+    </div>
+  </div>
+  <div class="rounds" id="rounds"></div>
+  <div class="meta">
+    <div><b id="mRound">0/8</b><span>Ronde</span></div>
+    <div><b id="mSet">1/1</b><span>Set</span></div>
+    <div><b id="mLeft">0:00</b><span>Resterend</span></div>
+  </div>
+  <div class="controls">
+    <button class="cbtn" id="bReset" aria-label="Reset"><svg viewBox="0 0 24 24"><path d="M12 5V2L7 6l5 4V7a6 6 0 1 1-6 6H4a8 8 0 1 0 8-8z"/></svg></button>
+    <button class="play" id="bPlay" aria-label="Start"><svg viewBox="0 0 24 24" id="playIcon"><path d="M8 5v14l11-7z"/></svg></button>
+    <button class="cbtn" id="bSkip" aria-label="Volgende"><svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg></button>
+  </div>
+  <div class="ledcard">
+    <div class="h"><span>Op het LED-bord</span><span id="ledState">niet verbonden</span></div>
+    <canvas id="led" width="640" height="160"></canvas>
+  </div>
+</section>
+
+<!-- ================= SCHEMA ================= -->
+<section class="view" id="v-plan">
+  <div class="title">Schema</div>
+  <div class="presets" id="presets"></div>
+  <div class="card" id="steppers"></div>
+  <div class="total"><span>Totale duur</span><b id="totalT">0:00</b></div>
+  <div class="card">
+    <div class="row"><div>Geluid<small>Piepjes bij 3-2-1 en faseswitch</small></div><label class="sw-t"><input type="checkbox" id="optSound" checked><span></span></label></div>
+    <div class="row"><div>Scherm aan houden<small>Tijdens de training</small></div><label class="sw-t"><input type="checkbox" id="optWake" checked><span></span></label></div>
+  </div>
+</section>
+
+<!-- ================= BORD ================= -->
+<section class="view" id="v-board">
+  <div class="title">LED-bord</div>
+  <div class="card pad">
+    <p class="lbl">Verbinding</p>
+    <button class="btn pri" id="bConnect">Verbinden met bord</button>
+    <button class="btn" id="bDisc">Verbreken</button>
+  </div>
+  <div class="card pad">
+    <p class="lbl">Helderheid <span id="brV" style="color:var(--txt)">70%</span></p>
+    <input type="range" id="bright" min="5" max="100" value="70">
+    <div style="display:flex;gap:10px;margin-top:10px"><button class="btn" id="pOn">Aan</button><button class="btn" id="pOff" style="margin-top:0">Uit</button></div>
+  </div>
+  <div class="card pad">
+    <p class="lbl">Bericht op het bord</p>
+    <input type="text" id="msg" maxlength="16" value="LETS GO!">
+    <button class="btn pri" id="bMsg" style="margin-top:10px">Tonen</button>
+  </div>
+  <div class="card pad">
+    <p class="lbl">Draaien</p>
+    <div class="seg" id="orient"><button class="sel" data-v="0">0°</button><button data-v="1">90°</button><button data-v="2">180°</button><button data-v="3">270°</button></div>
+  </div>
+  <div class="card">
+    <div class="row"><div>Alle apparaten tonen<small>Als het bord niet in de lijst staat</small></div><label class="sw-t"><input type="checkbox" id="allDev"><span></span></label></div>
+    <div class="row"><div>Veilige verzendmodus<small>Langzamer, maar betrouwbaarder</small></div><label class="sw-t"><input type="checkbox" id="safeMode"><span></span></label></div>
+  </div>
+  <p style="font-size:12px;color:var(--mut);text-align:center">Sluit de iPixel Color-app af; het bord accepteert één verbinding tegelijk.</p>
+</section>
+
+<nav class="tabs">
+  <button class="act" data-t="timer"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>Timer</button>
+  <button data-t="plan"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h7"/><circle cx="18" cy="16" r="3"/></svg>Schema</button>
+  <button data-t="board"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="10" rx="2"/><path d="M6 11h.01M9 11h.01M12 11h.01M15 11h.01M18 11h.01M6 14h.01M9 14h.01M12 14h.01"/></svg>Bord</button>
+</nav>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ helpers ============ */
+const $=id=>document.getElementById(id);
+const store={get(k,d){try{const v=localStorage.getItem('tabata.'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('tabata.'+k,JSON.stringify(v))}catch(e){}}};
+let tT;function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(tT);tT=setTimeout(()=>t.classList.remove('show'),2400)}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const fmt=s=>{s=Math.max(0,Math.ceil(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+const W=64,H=16;
+const PH={prep:{name:'Klaar maken',led:'START',col:'#ffcc00',css:'--prep'},work:{name:'Werk',led:'WERK',col:'#ff2a1f',css:'--work'},rest:{name:'Rust',led:'RUST',col:'#18e070',css:'--rest'},setrest:{name:'Setpauze',led:'PAUZE',col:'#2ea8ff',css:'--setrest'},done:{name:'Klaar!',led:'TOP!',col:'#c6ff00',css:'--done'}};
+
+/* ============ settings ============ */
+const DEF={prep:10,work:20,rest:10,rounds:8,sets:1,setrest:60};
+let cfg=Object.assign({},DEF,store.get('cfg',{}));
+const PRESETS=[
+  {n:'Klassiek',d:'20s / 10s · 8 rondes',c:{work:20,rest:10,rounds:8,sets:1}},
+  {n:'Starter',d:'15s / 15s · 8 rondes',c:{work:15,rest:15,rounds:8,sets:1}},
+  {n:'Pittig',d:'30s / 15s · 8 rondes',c:{work:30,rest:15,rounds:8,sets:1}},
+  {n:'Dubbel',d:'20s / 10s · 8 × 2 sets',c:{work:20,rest:10,rounds:8,sets:2}},
+];
+const STEPS=[
+  {k:'prep',t:'Voorbereiding',c:'--prep',min:0,max:60,st:5,s:true},
+  {k:'work',t:'Werk',c:'--work',min:5,max:300,st:5,s:true},
+  {k:'rest',t:'Rust',c:'--rest',min:0,max:300,st:5,s:true},
+  {k:'rounds',t:'Rondes',c:'--txt',min:1,max:30,st:1},
+  {k:'sets',t:'Sets',c:'--txt',min:1,max:10,st:1},
+  {k:'setrest',t:'Pauze tussen sets',c:'--setrest',min:0,max:300,st:15,s:true},
+];
+function renderPlan(){
+  $('presets').innerHTML='';
+  PRESETS.forEach(p=>{const b=document.createElement('button');b.className='preset'+(Object.keys(p.c).every(k=>cfg[k]===p.c[k])?' sel':'');b.innerHTML=`<b>${p.n}</b><span>${p.d}</span>`;b.onclick=()=>{Object.assign(cfg,p.c);saveCfg()};$('presets').appendChild(b)});
+  $('steppers').innerHTML='';
+  STEPS.forEach(s=>{
+    const r=document.createElement('div');r.className='stepper';
+    r.innerHTML=`<div class="n"><i class="sw" style="background:var(${s.c})"></i><span class="t">${s.t}</span></div><div class="ctl"><button>−</button><span class="v">${s.s?fmt(cfg[s.k]):cfg[s.k]}</span><button>+</button></div>`;
+    const [m,p]=r.querySelectorAll('button');
+    const ch=d=>{if(running)return toast('Stop eerst de timer');cfg[s.k]=Math.min(s.max,Math.max(s.min,cfg[s.k]+d*s.st));saveCfg()};
+    hold(m,()=>ch(-1));hold(p,()=>ch(1));
+    $('steppers').appendChild(r);
+  });
+  $('totalT').textContent=fmt(buildSegs().reduce((a,s)=>a+s.dur,0));
+}
+function hold(el,fn){let t,i;const stop=()=>{clearTimeout(t);clearInterval(i)};el.addEventListener('pointerdown',e=>{e.preventDefault();fn();t=setTimeout(()=>i=setInterval(fn,90),400)});['pointerup','pointerleave','pointercancel'].forEach(ev=>el.addEventListener(ev,stop))}
+function saveCfg(){store.set('cfg',cfg);renderPlan();resetTimer()}
+
+/* ============ timer engine ============ */
+function buildSegs(){
+  const s=[];if(cfg.prep>0)s.push({type:'prep',dur:cfg.prep,round:0,set:1});
+  for(let st=1;st<=cfg.sets;st++){
+    for(let r=1;r<=cfg.rounds;r++){
+      s.push({type:'work',dur:cfg.work,round:r,set:st});
+      if(cfg.rest>0&&r<cfg.rounds)s.push({type:'rest',dur:cfg.rest,round:r,set:st});
+    }
+    if(st<cfg.sets&&cfg.setrest>0)s.push({type:'setrest',dur:cfg.setrest,round:cfg.rounds,set:st});
+  }
+  return s;
+}
+let segs=[],idx=0,segStart=0,pausedAt=0,running=false,finished=false,raf=null,lastSec=-1,wakeLock=null;
+function curElapsed(){return ((running?performance.now():pausedAt)-segStart)/1000}
+function resetTimer(){
+  running=false;finished=false;cancelAnimationFrame(raf);segs=buildSegs();idx=0;segStart=performance.now();pausedAt=segStart;lastSec=-1;
+  setPlayIcon(false);releaseWake();render(true);
+}
+function start(){
+  initAudio();
+  if(finished)resetTimer();
+  const now=performance.now();segStart+=now-pausedAt;running=true;setPlayIcon(true);requestWake();
+  if(idx===0&&curElapsed()<0.05)phaseCue(segs[0].type);
+  loop();
+}
+function pause(){running=false;pausedAt=performance.now();cancelAnimationFrame(raf);setPlayIcon(false);render(true);releaseWake()}
+function skip(){if(finished)return;const now=running?performance.now():pausedAt;segStart=now-segs[idx].dur*1000;if(!running){advance();render(true)}}
+function advance(){
+  while(idx<segs.length&&curElapsed()>=segs[idx].dur){
+    segStart+=segs[idx].dur*1000;idx++;
+    if(idx>=segs.length){finish();return}
+    phaseCue(segs[idx].type);
+  }
+}
+function finish(){running=false;finished=true;cancelAnimationFrame(raf);setPlayIcon(false);releaseWake();beep(1046,.18);setTimeout(()=>beep(1318,.18),200);setTimeout(()=>beep(1568,.45),400);render(true)}
+function loop(){advance();if(!running)return;render();raf=requestAnimationFrame(loop)}
+
+const RING=854.5;
+function render(force){
+  let type,remain,seg,frac;
+  if(finished){type="done";remain=0;frac=0;seg={round:cfg.rounds,set:cfg.sets}}
+  else{seg=segs[idx]||{type:'done',dur:0,round:0,set:1};type=seg.type;remain=Math.max(0,seg.dur-curElapsed());frac=seg.dur?1-remain/seg.dur:0}
+  const idle=!running&&!finished&&idx===0&&curElapsed()<0.05;
+  document.documentElement.style.setProperty('--phase',`var(${PH[type].css})`);
+  $('phase').textContent=idle?'Klaar?':(!running&&!finished?'Pauze':PH[type].name);
+  const sec=Math.ceil(remain);
+  $('secs').textContent=finished?'✓':(sec>=60?fmt(sec):sec);
+  $('sub').textContent=finished?'Goed gedaan 💪':idle?'Druk op start':(type==='work'?'Alles geven!':type==='rest'?'Even ademen':type==='prep'?'Maak je klaar':'Herstel');
+  $('ring').style.strokeDashoffset=RING*frac;
+  const rd=type==='prep'?0:seg.round;
+  $('mRound').textContent=`${rd}/${cfg.rounds}`;$('mSet').textContent=`${seg.set}/${cfg.sets}`;
+  let left=finished?0:remain;for(let i=idx+1;i<segs.length;i++)left+=segs[i].dur;$('mLeft').textContent=fmt(left);
+  const rr=$('rounds');if(rr.children.length!==cfg.rounds){rr.innerHTML='';for(let i=0;i<cfg.rounds;i++)rr.appendChild(document.createElement('i'))}
+  [...rr.children].forEach((d,i)=>{const n=i+1;d.className=finished||n<rd||(n===rd&&type!=='work')?'done':(n===rd?'cur':'')});
+  // countdown beeps + board update once per second
+  const key=finished?'done':idx+':'+sec+':'+(running?1:0);
+  if(key!==lastSec){
+    if(running&&sec<=3&&sec>=1&&remain>0&&type!=='done')beep(880,.09);
+    lastSec=key;
+    const f=boardFrame(idle?'idle':type,sec,frac,seg,!running&&!finished&&!idle);
+    drawLED(f);queueBoard(f);
+  }
+}
+function setPlayIcon(p){$('playIcon').innerHTML=p?'<path d="M7 5h4v14H7zM13 5h4v14h-4z"/>':'<path d="M8 5v14l11-7z"/>'}
+
+/* ============ audio / wake ============ */
+let actx=null;
+function initAudio(){try{if(!actx)actx=new (window.AudioContext||window.webkitAudioContext)();if(actx.state==='suspended')actx.resume()}catch(e){}}
+function beep(f,d){if(!$('optSound').checked||!actx)return;try{const o=actx.createOscillator(),g=actx.createGain();o.type='square';o.frequency.value=f;g.gain.setValueAtTime(.0001,actx.currentTime);g.gain.exponentialRampToValueAtTime(.18,actx.currentTime+.01);g.gain.exponentialRampToValueAtTime(.0001,actx.currentTime+d);o.connect(g).connect(actx.destination);o.start();o.stop(actx.currentTime+d+.02)}catch(e){}}
+function phaseCue(t){if(t==='work')beep(1320,.45);else if(t==='rest'||t==='setrest')beep(660,.45);else if(t==='prep')beep(990,.15)}
+async function requestWake(){if(!$('optWake').checked)return;try{wakeLock=await navigator.wakeLock.request('screen')}catch(e){}}
+function releaseWake(){try{wakeLock&&wakeLock.release();wakeLock=null}catch(e){}}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&running)requestWake()});
+
+/* ============ pixel font (3x5) ============ */
+const FONT={'0':[7,5,5,5,7],'1':[2,6,2,2,7],'2':[7,1,7,4,7],'3':[7,1,7,1,7],'4':[5,5,7,1,1],'5':[7,4,7,1,7],'6':[7,4,7,5,7],'7':[7,1,1,2,2],'8':[7,5,7,5,7],'9':[7,5,7,1,7],
+A:[2,5,7,5,5],B:[6,5,6,5,6],C:[3,4,4,4,3],D:[6,5,5,5,6],E:[7,4,6,4,7],F:[7,4,6,4,4],G:[3,4,5,5,3],H:[5,5,7,5,5],I:[7,2,2,2,7],J:[1,1,1,5,2],K:[5,5,6,5,5],L:[4,4,4,4,7],M:[5,7,7,5,5],N:[6,5,5,5,5],O:[2,5,5,5,2],P:[6,5,6,4,4],Q:[2,5,5,6,3],R:[6,5,6,5,5],S:[3,4,2,1,6],T:[7,2,2,2,2],U:[5,5,5,5,7],V:[5,5,5,5,2],W:[5,5,5,7,5],X:[5,5,2,5,5],Y:[5,5,2,2,2],Z:[7,1,2,4,7],
+' ':[0,0,0,0,0],'/':[1,1,2,4,4],':':[0,2,0,2,0],'!':[2,2,2,0,2],'-':[0,0,7,0,0],'.':[0,0,0,0,2],'?':[6,1,2,0,2],'+':[0,2,7,2,0],"'":[2,2,0,0,0],'♥':[5,7,7,7,2]};
+const tw=(s,sc)=>s.length*4*sc-sc;
+function hex(c){const n=parseInt(c.slice(1),16);return[(n>>16)&255,(n>>8)&255,n&255]}
+function newBuf(){return new Uint8ClampedArray(W*H*4).map((v,i)=>i%4===3?255:0)}
+function px(b,x,y,c){if(x<0||y<0||x>=W||y>=H)return;const i=(y*W+x)*4;b[i]=c[0];b[i+1]=c[1];b[i+2]=c[2]}
+function text(b,s,x,y,sc,c){
+  s=s.toUpperCase();
+  for(const ch of s){const g=FONT[ch]||FONT['?'];for(let r=0;r<5;r++)for(let k=0;k<3;k++)if(g[r]&(4>>k))for(let a=0;a<sc;a++)for(let d=0;d<sc;d++)px(b,x+k*sc+d,y+r*sc+a,c);x+=4*sc}
+}
+function dim(c,f){return c.map(v=>Math.round(v*f))}
+function boardFrame(kind,sec,frac,seg,paused){
+  const b=newBuf();
+  if(kind==='idle'){const c=hex('#c6ff00');text(b,'TABATA',Math.floor((W-tw('TABATA',2))/2),3,2,c);return b}
+  if(kind==='done'){const c=hex(PH.done.col);text(b,'TOP!',Math.floor((W-tw('TOP!',3))/2),0,3,c);return b}
+  const col=hex(PH[kind].col);
+  // big number right
+  let num=String(sec),sc=3,y=0;
+  if(sec>99||tw(num,3)>27){num=fmt(sec);sc=2;y=3}
+  const nw=tw(num,sc);text(b,num,W-nw,y,sc,paused?dim(col,.45):col);
+  const leftW=W-nw-2;
+  // label + rounds
+  text(b,paused?'PAUZE':PH[kind].led,0,0,1,col);
+  const rd=kind==='prep'?0:seg.round;
+  let info=`${rd}/${cfg.rounds}`;if(cfg.sets>1&&tw(info+' S'+seg.set,1)<=leftW)info+=' S'+seg.set;
+  text(b,info,0,7,1,[200,200,200]);
+  // progress bar
+  const bw=Math.max(0,leftW-1),fill=Math.round(bw*frac);
+  for(let x=0;x<bw;x++)for(let yy=14;yy<16;yy++)px(b,x,yy,x<fill?col:dim(col,.18));
+  return b;
+}
+function msgFrame(s){const b=newBuf();s=s.toUpperCase().slice(0,16);let sc=tw(s,2)<=W?2:1;const c=hex('#c6ff00');text(b,s,Math.floor((W-tw(s,sc))/2),sc===2?3:5,sc,c);return b}
+
+/* ============ LED preview ============ */
+const led=$('led'),lx=led.getContext('2d');
+function drawLED(f){const s=led.width/W,r=s*.4;lx.fillStyle='#000';lx.fillRect(0,0,led.width,led.height);for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=(y*W+x)*4,R=f[i],G=f[i+1],B=f[i+2],on=R|G|B;lx.fillStyle=on?`rgb(${R},${G},${B})`:'#121317';if(on){lx.shadowColor=`rgb(${R},${G},${B})`;lx.shadowBlur=6}else lx.shadowBlur=0;lx.beginPath();lx.arc(x*s+s/2,y*s+s/2,r,0,6.2832);lx.fill()}lx.shadowBlur=0}
+
+/* ============ Bluetooth (iPixel Color protocol) ============ */
+const CRC_T=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+function crc32(b){let c=0xFFFFFFFF;for(let i=0;i<b.length;i++)c=CRC_T[(c^b[i])&255]^(c>>>8);return(c^0xFFFFFFFF)>>>0}
+const SVC=0x00fa,CH_W=0xfa02,CH_N=0xfa03;
+let device=null,chW=null,chN=null,ackW=null;
+function setConn(on,t){$('pill').classList.toggle('on',on);$('pillTxt').textContent=t;$('ledState').textContent=on?'live':'niet verbonden'}
+async function connect(){
+  if(!navigator.bluetooth){$('noBle').style.display='block';toast('Open deze pagina in Bluefy');return}
+  try{
+    const opt=[SVC,0xfa00,0xae00,0xfee7];
+    device=await navigator.bluetooth.requestDevice($('allDev').checked?{acceptAllDevices:true,optionalServices:opt}:{filters:[{namePrefix:'LED_BLE'},{services:[SVC]}],optionalServices:opt});
+    device.addEventListener('gattserverdisconnected',()=>{chW=null;setConn(false,'Verbroken')});
+    setConn(false,'Verbinden…');
+    const srv=await device.gatt.connect();let svc;
+    try{svc=await srv.getPrimaryService(SVC)}catch(e){for(const s of await srv.getPrimaryServices()){try{await s.getCharacteristic(CH_W);svc=s;break}catch(_){}}}
+    if(!svc)throw new Error('geen iPixel-service gevonden');
+    chW=await svc.getCharacteristic(CH_W);
+    try{chN=await svc.getCharacteristic(CH_N);await chN.startNotifications();chN.addEventListener('characteristicvaluechanged',e=>{const v=new Uint8Array(e.target.value.buffer);if(v.length>=5&&v[0]===5&&v[1]===0&&ackW){const w=ackW;ackW=null;w(v[4])}})}catch(e){chN=null}
+    setConn(true,'Verbonden');toast('LED-bord verbonden ✅');
+    await cmd(0x07,0x01,[1]);await cmd(0x04,0x80,[+$('bright').value]);
+    lastSec=-1;render(true);
+  }catch(e){setConn(false,'LED-bord');if(e.name!=='NotFoundError')toast('Fout: '+e.message)}
+}
+const waitAck=ms=>new Promise(res=>{const fn=s=>{clearTimeout(t);res(s)};const t=setTimeout(()=>{if(ackW===fn)ackW=null;res(-1)},ms);ackW=fn});
+async function wr(b,resp){if(resp||!chW.writeValueWithoutResponse)return chW.writeValueWithResponse?chW.writeValueWithResponse(b):chW.writeValue(b);return chW.writeValueWithoutResponse(b)}
+async function cmd(c,t,p=[]){if(!chW)return;const n=4+p.length;await wr(new Uint8Array([n&255,n>>8,c,t,...p]),true)}
+async function sendPNG(data){
+  const size=data.length,crc=crc32(data),safe=$('safeMode').checked,CH=safe?120:180;
+  const le=v=>[v&255,(v>>>8)&255,(v>>>16)&255,(v>>>24)&255];
+  const head=[2,0,0,...le(size),...le(crc),0,0],tot=head.length+size+2;
+  const buf=new Uint8Array(tot);buf[0]=tot&255;buf[1]=tot>>8;buf.set(head,2);buf.set(data,2+head.length);
+  const ack=chN?waitAck(1500):null;let n=0;
+  for(let i=0;i<buf.length;i+=CH){n++;await wr(buf.subarray(i,i+CH),safe||i+CH>=buf.length||n%8===0)}
+  if(ack)await ack;else await sleep(80);
+}
+const pngCanvas=document.createElement('canvas');pngCanvas.width=W;pngCanvas.height=H;
+async function toPNG(f){pngCanvas.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(f),W,H),0,0);const bl=await new Promise(r=>pngCanvas.toBlob(r,'image/png'));return new Uint8Array(await bl.arrayBuffer())}
+// latest-frame-wins queue so the board never lags behind the timer
+let pending=null,sending=false;
+function queueBoard(f){if(!chW)return;pending=f;if(!sending)pump()}
+async function pump(){sending=true;while(pending&&chW){const f=pending;pending=null;try{await sendPNG(await toPNG(f))}catch(e){console.warn(e);await sleep(200)}}sending=false}
+
+/* ============ wiring ============ */
+$('bPlay').onclick=()=>running?pause():start();
+$('bReset').onclick=resetTimer;
+$('bSkip').onclick=skip;
+$('pill').onclick=()=>chW?showTab('board'):connect();
+$('bConnect').onclick=connect;
+$('bDisc').onclick=()=>{if(device&&device.gatt.connected)device.gatt.disconnect()};
+let brT;$('bright').value=store.get('bright',70);$('brV').textContent=$('bright').value+'%';
+$('bright').oninput=e=>{$('brV').textContent=e.target.value+'%';store.set('bright',+e.target.value);clearTimeout(brT);brT=setTimeout(()=>cmd(0x04,0x80,[+e.target.value]),120)};
+$('pOn').onclick=()=>cmd(0x07,0x01,[1]);$('pOff').onclick=()=>cmd(0x07,0x01,[0]);
+$('bMsg').onclick=()=>{const f=msgFrame($('msg').value||' ');drawLED(f);if(!chW)return toast('Eerst verbinden');queueBoard(f);toast('Op het bord')};
+document.querySelectorAll('#orient button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#orient button').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');cmd(0x06,0x80,[+b.dataset.v&3])});
+['allDev','safeMode','optSound','optWake'].forEach(id=>{const el=$(id);el.checked=store.get(id,el.checked);el.onchange=()=>store.set(id,el.checked)});
+function showTab(t){document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('act',x.dataset.t===t));document.querySelectorAll('.view').forEach(v=>v.classList.toggle('act',v.id==='v-'+t));if(t==='plan')renderPlan()}
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>showTab(b.dataset.t));
+if(!navigator.bluetooth)$('noBle').style.display='block';
+renderPlan();resetTimer();
+</script>
+</body>
+</html>
