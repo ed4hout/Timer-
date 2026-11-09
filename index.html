@@ -189,7 +189,7 @@ input[type=text]{width:100%;font:600 18px Inter,sans-serif;text-transform:upperc
     <p class="lbl">Geluid <span id="volV" style="color:var(--txt)">80%</span></p>
     <input type="range" id="vol" min="0" max="100" value="80">
     <div id="sounds"></div>
-    <div class="row" style="border-bottom:0;padding-bottom:0"><div>Mixen met muziek<small>Spotify blijft spelen · stille modus uit</small></div><label class="sw-t"><input type="checkbox" id="optMix"><span></span></label></div>
+    <div class="row" style="border-bottom:0;padding-bottom:0"><div>Mixen met muziek<small id="mixNote">Spotify blijft spelen · stille modus uit</small></div><label class="sw-t"><input type="checkbox" id="optMix"><span></span></label></div>
     <p style="font-size:11px;color:var(--mut);margin:6px 0 0">Tik op ▶ om te testen. Geluid speelt alleen als de app open staat.</p>
   </div>
   <div class="card">
@@ -402,8 +402,10 @@ let snd=Object.assign({},SND_DEF,store.get('snd',{}));
 function silentWav(){const n=4000,b=new ArrayBuffer(44+n*2),v=new DataView(b);const w=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))};
   w(0,'RIFF');v.setUint32(4,36+n*2,true);w(8,'WAVE');w(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,8000,true);v.setUint32(28,16000,true);v.setUint16(32,2,true);v.setUint16(34,16,true);w(36,'data');v.setUint32(40,n*2,true);
   return URL.createObjectURL(new Blob([b],{type:'audio/wav'}))}
+const canMix=()=>'audioSession' in navigator;
 function initAudio(){
-  // mix: sounds play over Spotify (iPhone mute switch must be off) · no mix: works in silent mode but pauses other music
+  // Mixen aan + browser kan niet mixen: géén audio starten, anders pauzeert iOS Spotify
+  if(snd.mix&&!canMix()){stopKeepAlive();return}
   try{if(navigator.audioSession)navigator.audioSession.type=snd.mix?'ambient':'playback'}catch(e){}
   if(!snd.mix){try{if(!silentEl){silentEl=new Audio(silentWav());silentEl.loop=true;silentEl.setAttribute('playsinline','')}silentEl.play().catch(()=>{})}catch(e){}}else stopKeepAlive();
   try{if(!actx){actx=new (window.AudioContext||window.webkitAudioContext)();master=actx.createGain();master.connect(actx.destination)}if(actx.state!=='running')actx.resume()}catch(e){}
@@ -420,6 +422,7 @@ function say(t){try{if(!t)return;speechSynthesis.cancel();const u=new SpeechSynt
 // kind: 'count' (3-2-1), 'phase' (start of work/rest), 'done'
 function playSound(name,kind,word){
   if(name==='uit'||!name)return;
+  if(snd.mix&&!canMix())return;
   if(name==='stem')return say(word);
   if(!actx)return;master.gain.value=snd.vol/100;
   const short=kind==='count';
@@ -620,14 +623,15 @@ function renderSounds(){
     const sel=r.querySelector('select'),bt=r.querySelector('button');
     const word=()=>w==='3'?'3':PH[w].name;
     sel.onchange=()=>{snd[k]=sel.value;store.set('snd',snd);initAudio();playSound(snd[k],kind,word())};
-    bt.onclick=()=>{initAudio();setTimeout(()=>playSound(snd[k],kind,word()),60)};
+    bt.onclick=()=>{if(snd.mix&&!canMix())return toast('Zet Mixen met muziek uit om piepjes te horen');initAudio();setTimeout(()=>playSound(snd[k],kind,word()),60)};
     box.appendChild(r);
   });
 }
 $('vol').value=snd.vol;$('volV').textContent=snd.vol+'%';
 $('vol').oninput=e=>{snd.vol=+e.target.value;$('volV').textContent=snd.vol+'%';store.set('snd',snd);if(master)master.gain.value=snd.vol/100};
 renderSounds();renderIcons();
-$('optMix').checked=snd.mix;$('optMix').onchange=e=>{snd.mix=e.target.checked;store.set('snd',snd);stopKeepAlive();initAudio();toast(snd.mix?'Muziek blijft spelen':'Geluid ook in stille modus')};
+function mixNote(){$('mixNote').textContent=!snd.mix?'Uit: piepjes werken, Spotify pauzeert':canMix()?'Aan: Spotify + piepjes samen (stille modus uit)':'Aan: Spotify blijft spelen, piepjes uit (Bluefy kan niet mixen)';$('sounds').style.opacity=snd.mix&&!canMix()?.4:1}
+$('optMix').checked=snd.mix;mixNote();$('optMix').onchange=e=>{snd.mix=e.target.checked;store.set('snd',snd);stopKeepAlive();initAudio();mixNote();if(!snd.mix)return toast('Piepjes aan · Spotify pauzeert bij start');if(actx){try{actx.close()}catch(e){}actx=null;master=null}toast('Spotify blijft spelen')};
 applyLook();renderLooks();$('favCancel').onclick=()=>$('saveBar').classList.remove('show');$('favName').addEventListener('keydown',e=>{if(e.key==='Enter')saveFav()});
 $('bReset').onclick=resetTimer;
 $('bSkip').onclick=skip;
