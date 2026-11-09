@@ -76,7 +76,7 @@ button:active{transform:scale(.96)}
 .stepper .ctl{display:flex;align-items:center;gap:6px}
 .stepper .ctl button{width:36px;height:36px;border-radius:11px;background:var(--card2);border:1px solid var(--line);font-size:20px;font-weight:600;display:grid;place-items:center}
 .stepper .v{font-family:var(--cond);font-weight:700;font-size:21px;min-width:52px;text-align:center;font-variant-numeric:tabular-nums}
-.presets{display:flex;gap:8px;overflow-x:auto;margin:0 -16px 10px;padding:2px 16px;scrollbar-width:none;-webkit-overflow-scrolling:touch}.presets::-webkit-scrollbar{display:none}.preset.mine b::before{content:"★ ";color:var(--prep);font-style:normal}.preset .del{position:absolute;top:0;right:0;width:30px;height:30px;color:var(--mut);font-size:18px}.preset.add{border-style:dashed;min-width:96px}.preset.add b{font-style:normal}.savebar{display:none;gap:8px;margin-bottom:10px}.savebar.show{display:flex}
+.presets{display:flex;gap:8px;overflow-x:auto;margin:0 -16px 10px;padding:2px 16px;scrollbar-width:none;-webkit-overflow-scrolling:touch}.presets::-webkit-scrollbar{display:none}.preset.mine b::before{content:"★ ";color:var(--prep);font-style:normal}.preset .del{position:absolute;top:0;right:0;width:30px;height:30px;color:var(--mut);font-size:18px}.preset.add{border-style:dashed;min-width:96px}.preset.add b{font-style:normal}.lrow{display:flex;align-items:center;gap:8px;padding:4px 0}.lrow .ln{width:92px;font-size:13px;color:var(--mut);font-weight:600}.lrow input[type=color]{-webkit-appearance:none;appearance:none;width:42px;height:42px;border:1px solid var(--line);border-radius:11px;padding:3px;background:var(--card2);flex:none}.lrow input[type=color]::-webkit-color-swatch-wrapper{padding:0}.lrow input[type=color]::-webkit-color-swatch{border:0;border-radius:8px}.lrow input[type=text]{flex:1;min-width:0;padding:9px 12px;font-size:16px}.savebar{display:none;gap:8px;margin-bottom:10px}.savebar.show{display:flex}
 .preset{position:relative;flex:none;min-width:138px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:8px 26px 8px 12px;text-align:left;cursor:pointer}
 .preset b{display:block;font-family:var(--cond);font-size:18px;line-height:1.2;font-weight:800;text-transform:uppercase;font-style:italic}
 .preset span{font-size:12px;color:var(--mut)}
@@ -173,6 +173,12 @@ input[type=text]{width:100%;font:600 18px Inter,sans-serif;text-transform:upperc
     <p class="lbl" style="margin-top:12px">Draaien</p>
     <div class="seg" id="orient"><button class="sel" data-v="0">0°</button><button data-v="1">90°</button><button data-v="2">180°</button><button data-v="3">270°</button></div>
   </div>
+  <div class="card pad">
+    <p class="lbl">Teksten &amp; kleuren</p>
+    <div id="looks"></div>
+    <p style="font-size:11px;color:var(--mut);margin:6px 0 8px">Letters, cijfers en ! ? - . / : + ♥ · max. 8 tekens</p>
+    <button class="btn" id="lookReset">Standaard herstellen</button>
+  </div>
   <div class="card">
     <div class="row"><div>Geluid<small>Piepjes bij 3-2-1 en faseswitch</small></div><label class="sw-t"><input type="checkbox" id="optSound" checked><span></span></label></div>
     <div class="row"><div>Scherm aan houden<small>Tijdens de training</small></div><label class="sw-t"><input type="checkbox" id="optWake" checked><span></span></label></div>
@@ -197,7 +203,12 @@ let tT;function toast(m){const t=$('toast');t.textContent=m;t.classList.add('sho
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const fmt=s=>{s=Math.max(0,Math.ceil(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
 const W=64,H=16;
-const PH={prep:{name:'Gereed',led:'START',col:'#ffcc00',css:'--prep'},work:{name:'Werk',led:'WERK',col:'#ff2a1f',css:'--work'},rest:{name:'Rust',led:'RUST',col:'#18e070',css:'--rest'},setrest:{name:'Setpauze',led:'PAUZE',col:'#2ea8ff',css:'--setrest'},done:{name:'Klaar!',led:'TOP!',col:'#c6ff00',css:'--done'}};
+const PH={prep:{css:'--prep'},work:{css:'--work'},rest:{css:'--rest'},setrest:{css:'--setrest'},done:{css:'--done'}};
+const LOOK_DEF={prep:{t:'START',c:'#ffcc00'},work:{t:'WERK',c:'#ff2a1f'},rest:{t:'RUST',c:'#18e070'},setrest:{t:'PAUZE',c:'#2ea8ff'},done:{t:'TOP!',c:'#c6ff00'},pause:{t:'PAUZE',c:'#ffffff'}};
+const LOOK_NAMES={prep:'Voorbereiden',work:'Werk',rest:'Rust',setrest:'Setpauze',done:'Einde',pause:'Pauze'};
+let look=JSON.parse(JSON.stringify(LOOK_DEF));try{const sv=JSON.parse(localStorage.getItem('tabata.look')||'{}');for(const k in look)if(sv[k])Object.assign(look[k],sv[k])}catch(e){}
+function applyLook(){for(const k in PH){PH[k].name=look[k].t;PH[k].led=look[k].t;PH[k].col=look[k].c;document.documentElement.style.setProperty('--'+k,look[k].c)}}
+applyLook();
 
 /* ============ settings & favourites ============ */
 const DEF={prep:10,work:20,rest:10,rounds:8,sets:1,setrest:60};
@@ -323,7 +334,7 @@ function render(){
   if(uploading){
     $('phase').textContent='Laden';$('secs').textContent=upPct+'%';$('sub').textContent='Training naar het bord…';$('ring').style.strokeDashoffset=RING*(1-upPct/100);return;
   }
-  $('phase').textContent=idle?'Klaar?':(!running&&!finished?'Pauze':PH[type].name);
+  $('phase').textContent=idle?'Klaar?':(!running&&!finished?look.pause.t:PH[type].name);
   $('secs').textContent=finished?'✓':(sec>=60?fmt(sec):sec);
   $('sub').textContent=finished?'Goed gedaan 💪':idle?'Druk op start':(type==='work'?'Alles geven!':type==='rest'?'Even ademen':type==='prep'?'Maak je klaar':'Herstel');
   $('ring').style.strokeDashoffset=RING*frac;
@@ -386,7 +397,7 @@ function dim(c,f){return c.map(v=>Math.round(v*f))}
 function boardFrame(kind,sec,frac,seg,paused){
   const b=newBuf();
   if(kind==='idle'){const c=hex('#c6ff00');text(b,'TABATA',Math.floor((W-tw('TABATA',2))/2),3,2,c);return b}
-  if(kind==='done'){const c=hex(PH.done.col);text(b,'TOP!',Math.floor((W-tw('TOP!',3))/2),0,3,c);return b}
+  if(kind==='done'){const c=hex(PH.done.col),t=PH.done.led||' ',sc=tw(t,3)<=W?3:tw(t,2)<=W?2:1;text(b,t,Math.floor((W-tw(t,sc))/2),sc===3?0:sc===2?3:5,sc,c);return b}
   const col=hex(PH[kind].col);
   // big number right
   let num=String(sec),sc=3,y=0;
@@ -394,7 +405,7 @@ function boardFrame(kind,sec,frac,seg,paused){
   const nw=tw(num,sc);text(b,num,W-nw,y,sc,paused?dim(col,.45):col);
   const leftW=W-nw-2;
   // label + rounds
-  text(b,paused?'PAUZE':PH[kind].led,0,0,1,col);
+  {const lab=(paused?look.pause.t:PH[kind].led).slice(0,Math.max(1,Math.floor((leftW+1)/4)));text(b,lab,0,0,1,paused?hex(look.pause.c):col)}
   const rd=kind==='prep'?0:seg.round;
   let info=`${rd}/${cfg.rounds}`;if(cfg.sets>1&&tw(info+' S'+seg.set,1)<=leftW)info+=' S'+seg.set;
   text(b,info,0,7,1,[200,200,200]);
@@ -490,7 +501,22 @@ async function pump(){sending=true;while(pending&&chW){const f=pending;pending=n
 
 /* ============ wiring ============ */
 $('bPlay').onclick=()=>running?pause():start();
-$('favSave').onclick=saveFav;$('favCancel').onclick=()=>$('saveBar').classList.remove('show');$('favName').addEventListener('keydown',e=>{if(e.key==='Enter')saveFav()});
+$('favSave').onclick=saveFav;
+function saveLook(){store.set('look',look);applyLook();lastKey='';render()}
+function previewLook(k){if(running)return;const sg={round:3,set:1};const f=k==='done'?boardFrame('done',0,1,{},false):boardFrame(k==='pause'?'work':k,15,.5,sg,k==='pause');drawLED(f);queueBoard(f)}
+function renderLooks(){
+  const box=$('looks');box.innerHTML='';
+  Object.keys(LOOK_DEF).forEach(k=>{
+    const r=document.createElement('div');r.className='lrow';
+    r.innerHTML=`<span class="ln">${LOOK_NAMES[k]}</span><input type="color"><input type="text" maxlength="8">`;
+    const [c,t]=r.querySelectorAll('input');c.value=look[k].c;t.value=look[k].t;
+    c.oninput=()=>{look[k].c=c.value;saveLook();previewLook(k)};
+    t.oninput=()=>{const v=t.value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().split('').filter(ch=>FONT[ch]).join('').slice(0,8);if(v!==t.value)t.value=v;look[k].t=v||LOOK_DEF[k].t;saveLook();previewLook(k)};
+    box.appendChild(r);
+  });
+}
+$('lookReset').onclick=()=>{look=JSON.parse(JSON.stringify(LOOK_DEF));saveLook();renderLooks();toast('Standaard teksten en kleuren')};
+renderLooks();$('favCancel').onclick=()=>$('saveBar').classList.remove('show');$('favName').addEventListener('keydown',e=>{if(e.key==='Enter')saveFav()});
 $('bReset').onclick=resetTimer;
 $('bSkip').onclick=skip;
 $('pill').onclick=()=>chW?showTab('board'):connect();
