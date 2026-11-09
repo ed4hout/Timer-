@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#07080b">
-<title>Tabata LED</title>
+<title>Ed’s Tabata</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -76,7 +76,7 @@ button:active{transform:scale(.96)}
 .stepper .ctl{display:flex;align-items:center;gap:6px}
 .stepper .ctl button{width:36px;height:36px;border-radius:11px;background:var(--card2);border:1px solid var(--line);font-size:20px;font-weight:600;display:grid;place-items:center}
 .stepper .v{font-family:var(--cond);font-weight:700;font-size:21px;min-width:52px;text-align:center;font-variant-numeric:tabular-nums}
-.presets{display:flex;gap:8px;overflow-x:auto;margin:0 -16px 10px;padding:2px 16px;scrollbar-width:none;-webkit-overflow-scrolling:touch}.presets::-webkit-scrollbar{display:none}.preset.mine b::before{content:"★ ";color:var(--prep);font-style:normal}.preset .del{position:absolute;top:0;right:0;width:30px;height:30px;color:var(--mut);font-size:18px}.preset.add{border-style:dashed;min-width:96px}.preset.add b{font-style:normal}.lrow{display:flex;align-items:center;gap:8px;padding:4px 0}.lrow .ln{width:92px;font-size:13px;color:var(--mut);font-weight:600}.lrow input[type=color]{-webkit-appearance:none;appearance:none;width:42px;height:42px;border:1px solid var(--line);border-radius:11px;padding:3px;background:var(--card2);flex:none}.lrow input[type=color]::-webkit-color-swatch-wrapper{padding:0}.lrow input[type=color]::-webkit-color-swatch{border:0;border-radius:8px}.lrow input[type=text]{flex:1;min-width:0;padding:9px 12px;font-size:16px}.srow{display:flex;align-items:center;gap:8px;padding:4px 0}.srow .ln{width:92px;font-size:13px;color:var(--mut);font-weight:600}.srow select{flex:1;min-width:0;font:600 15px Inter,sans-serif;background:var(--card2);color:var(--txt);border:1px solid var(--line);border-radius:11px;padding:10px;-webkit-appearance:none;appearance:none}.srow button{width:42px;height:42px;border-radius:11px;background:var(--card2);border:1px solid var(--line);flex:none}.savebar{display:none;gap:8px;margin-bottom:10px}.savebar.show{display:flex}
+.presets{display:flex;gap:8px;overflow-x:auto;margin:0 -16px 10px;padding:2px 16px;scrollbar-width:none;-webkit-overflow-scrolling:touch}.presets::-webkit-scrollbar{display:none}.preset.mine b::before{content:"★ ";color:var(--prep);font-style:normal}.preset .del{position:absolute;top:0;right:0;width:30px;height:30px;color:var(--mut);font-size:18px}.preset.add{border-style:dashed;min-width:96px}.preset.add b{font-style:normal}.lrow{display:flex;align-items:center;gap:8px;padding:4px 0}.lrow .ln{width:92px;font-size:13px;color:var(--mut);font-weight:600}.lrow input[type=color]{-webkit-appearance:none;appearance:none;width:42px;height:42px;border:1px solid var(--line);border-radius:11px;padding:3px;background:var(--card2);flex:none}.lrow input[type=color]::-webkit-color-swatch-wrapper{padding:0}.lrow input[type=color]::-webkit-color-swatch{border:0;border-radius:8px}.lrow input[type=text]{flex:1;min-width:0;padding:9px 12px;font-size:16px}.srow{display:flex;align-items:center;gap:8px;padding:4px 0}.srow .ln{width:92px;font-size:13px;color:var(--mut);font-weight:600}.srow select{flex:1;min-width:0;font:600 15px Inter,sans-serif;background:var(--card2);color:var(--txt);border:1px solid var(--line);border-radius:11px;padding:10px;-webkit-appearance:none;appearance:none}.srow button{width:42px;height:42px;border-radius:11px;background:var(--card2);border:1px solid var(--line);flex:none}details.fold{padding:0 14px}details.fold summary{list-style:none;display:flex;align-items:center;gap:10px;padding:13px 0;font-weight:600;cursor:pointer}details.fold summary::-webkit-details-marker{display:none}details.fold summary>span:first-child{flex:1}.sw-prev{display:flex;gap:4px}.sw-prev i{width:12px;height:12px;border-radius:4px}.chev{width:9px;height:9px;border-right:2px solid var(--mut);border-bottom:2px solid var(--mut);transform:rotate(45deg);transition:transform .2s;margin:-4px 4px 0}details[open] .chev{transform:rotate(225deg);margin-top:4px}.fold-body{padding:0 0 12px;border-top:1px solid var(--line);padding-top:8px}.savebar{display:none;gap:8px;margin-bottom:10px}.savebar.show{display:flex}
 .preset{position:relative;flex:none;min-width:138px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:8px 26px 8px 12px;text-align:left;cursor:pointer}
 .preset b{display:block;font-family:var(--cond);font-size:18px;line-height:1.2;font-weight:800;text-transform:uppercase;font-style:italic}
 .preset span{font-size:12px;color:var(--mut)}
@@ -115,7 +115,7 @@ input[type=text]{width:100%;font:600 18px Inter,sans-serif;text-transform:upperc
 <body>
 
 <div class="top">
-  <div class="brand">Tabata<i>.</i></div>
+  <div class="brand">Ed’s Tabata<i>.</i></div>
   <button class="pill" id="pill"><i class="d"></i><span id="pillTxt">LED-bord</span></button>
 </div>
 
@@ -156,12 +156,14 @@ input[type=text]{width:100%;font:600 18px Inter,sans-serif;text-transform:upperc
   <div class="presets" id="presets"></div>
   <div class="savebar" id="saveBar"><input type="text" id="favName" placeholder="Naam, bijv. Benen" maxlength="18" style="text-transform:none"><button class="btn pri" id="favSave" style="width:auto;padding:12px 16px">Bewaar</button><button class="btn" id="favCancel" style="width:auto;padding:12px 14px;margin-top:0">✕</button></div>
   <div class="card" id="steppers"></div>
-  <div class="card pad">
-    <p class="lbl">Teksten &amp; kleuren</p>
-    <div id="looks"></div>
-    <p style="font-size:11px;color:var(--mut);margin:6px 0 8px">Letters, cijfers en ! ? - . / : + ♥ · max. 8 tekens</p>
-    <button class="btn" id="lookReset">Standaard herstellen</button>
-  </div>
+  <details class="card fold" id="lookFold">
+    <summary><span>Teksten &amp; kleuren</span><span class="sw-prev" id="lookPrev"></span><i class="chev"></i></summary>
+    <div class="fold-body">
+      <div id="looks"></div>
+      <p style="font-size:11px;color:var(--mut);margin:6px 0 8px">Letters, cijfers en ! ? - . / : + ♥ · max. 8 tekens</p>
+      <button class="btn" id="lookReset">Standaard herstellen</button>
+    </div>
+  </details>
 </section>
 
 <!-- ================= BORD ================= -->
@@ -212,7 +214,7 @@ const PH={prep:{css:'--prep'},work:{css:'--work'},rest:{css:'--rest'},setrest:{c
 const LOOK_DEF={prep:{t:'START',c:'#ffcc00'},work:{t:'WERK',c:'#ff2a1f'},rest:{t:'RUST',c:'#18e070'},setrest:{t:'PAUZE',c:'#2ea8ff'},done:{t:'TOP!',c:'#c6ff00'},pause:{t:'PAUZE',c:'#ffffff'}};
 const LOOK_NAMES={prep:'Voorbereiden',work:'Werk',rest:'Rust',setrest:'Setpauze',done:'Einde',pause:'Pauze'};
 let look=JSON.parse(JSON.stringify(LOOK_DEF));try{const sv=JSON.parse(localStorage.getItem('tabata.look')||'{}');for(const k in look)if(sv[k])Object.assign(look[k],sv[k])}catch(e){}
-function applyLook(){for(const k in PH){PH[k].name=look[k].t;PH[k].led=look[k].t;PH[k].col=look[k].c;document.documentElement.style.setProperty('--'+k,look[k].c)}}
+function applyLook(){const pv=document.getElementById('lookPrev');if(pv)pv.innerHTML=['prep','work','rest','setrest','done'].map(k=>`<i style="background:${look[k].c}"></i>`).join('');for(const k in PH){PH[k].name=look[k].t;PH[k].led=look[k].t;PH[k].col=look[k].c;document.documentElement.style.setProperty('--'+k,look[k].c)}}
 applyLook();
 
 /* ============ settings & favourites ============ */
@@ -584,7 +586,7 @@ function renderSounds(){
 $('vol').value=snd.vol;$('volV').textContent=snd.vol+'%';
 $('vol').oninput=e=>{snd.vol=+e.target.value;$('volV').textContent=snd.vol+'%';store.set('snd',snd);if(master)master.gain.value=snd.vol/100};
 renderSounds();
-renderLooks();$('favCancel').onclick=()=>$('saveBar').classList.remove('show');$('favName').addEventListener('keydown',e=>{if(e.key==='Enter')saveFav()});
+applyLook();renderLooks();$('favCancel').onclick=()=>$('saveBar').classList.remove('show');$('favName').addEventListener('keydown',e=>{if(e.key==='Enter')saveFav()});
 $('bReset').onclick=resetTimer;
 $('bSkip').onclick=skip;
 $('pill').onclick=()=>chW?showTab('board'):connect();
