@@ -18,16 +18,16 @@
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font:15px/1.4 Inter,-apple-system,system-ui,sans-serif}
-body{padding:calc(env(safe-area-inset-top) + 10px) 18px calc(env(safe-area-inset-bottom) + 92px);overflow-x:hidden}
+body{padding:calc(env(safe-area-inset-top) + 6px) 16px calc(env(safe-area-inset-bottom) + 80px);overflow-x:hidden}
 body::before{content:"";position:fixed;inset:-20%;background:radial-gradient(60% 45% at 50% 30%,color-mix(in srgb,var(--phase) 22%,transparent),transparent 70%);transition:background .6s;z-index:-1;pointer-events:none}
 button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 button:active{transform:scale(.96)}
 
 /* top bar */
-.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
-.brand{font-family:var(--cond);font-weight:800;font-size:26px;letter-spacing:1.5px;text-transform:uppercase;font-style:italic}
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px}
+.brand{font-family:var(--cond);font-weight:800;font-size:23px;letter-spacing:1.5px;text-transform:uppercase;font-style:italic}
 .brand i{color:var(--phase);font-style:italic;transition:color .4s}
-.pill{display:flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 13px;font-size:13px;font-weight:600}
+.pill{display:flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600}
 .pill .d{width:8px;height:8px;border-radius:50%;background:#555}
 .pill.on .d{background:var(--rest);box-shadow:0 0 10px var(--rest)}
 
@@ -35,55 +35,55 @@ button:active{transform:scale(.96)}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
 /* timer */
-.ringwrap{position:relative;width:min(84vw,340px);aspect-ratio:1;margin:8px auto 0}
+.ringwrap{position:relative;width:min(74vw,37vh,330px);aspect-ratio:1;margin:2px auto 0}
 .ringwrap svg{width:100%;height:100%;transform:rotate(-90deg)}
 .ring-bg{stroke:#1a1d24}
 .ring-fg{stroke:var(--phase);stroke-linecap:round;transition:stroke .4s;filter:drop-shadow(0 0 10px color-mix(in srgb,var(--phase) 60%,transparent))}
 .center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.phase{font-family:var(--cond);font-weight:800;font-size:28px;letter-spacing:4px;text-transform:uppercase;color:var(--phase);transition:color .4s}
-.secs{font-family:var(--cond);font-weight:800;font-size:min(34vw,140px);line-height:.9;font-variant-numeric:tabular-nums;letter-spacing:-2px}
-.sub{font-size:13px;color:var(--mut);font-weight:500;letter-spacing:.5px;margin-top:4px}
+.phase{font-family:var(--cond);font-weight:800;font-size:min(26px,3.4vh);letter-spacing:3px;text-transform:uppercase;color:var(--phase);transition:color .4s}
+.secs{font-family:var(--cond);font-weight:800;font-size:min(30vw,15vh,130px);line-height:.9;font-variant-numeric:tabular-nums;letter-spacing:-2px}
+.sub{font-size:12px;color:var(--mut);font-weight:500;letter-spacing:.5px;margin-top:4px}
 
-.rounds{display:flex;justify-content:center;gap:6px;margin:18px 0 6px;flex-wrap:wrap}
+.rounds{display:flex;justify-content:center;gap:5px;margin:8px 0 2px;flex-wrap:wrap}
 .rounds i{width:26px;height:6px;border-radius:3px;background:#20232b;transition:background .3s}
 .rounds i.done{background:var(--phase)}
 .rounds i.cur{background:color-mix(in srgb,var(--phase) 45%,#20232b)}
-.meta{display:flex;justify-content:space-between;margin:14px 4px 0}
+.meta{display:flex;justify-content:space-between;margin:6px 4px 0}
 .meta div{text-align:center;flex:1}
-.meta b{display:block;font-family:var(--cond);font-size:26px;font-weight:700;font-variant-numeric:tabular-nums}
-.meta span{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:1.2px}
+.meta b{display:block;font-family:var(--cond);font-size:22px;line-height:1.1;font-weight:700;font-variant-numeric:tabular-nums}
+.meta span{font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:1.2px}
 
-.controls{display:flex;align-items:center;justify-content:center;gap:26px;margin-top:20px}
-.cbtn{width:58px;height:58px;border-radius:50%;background:var(--card);border:1px solid var(--line);display:grid;place-items:center}
+.controls{display:flex;align-items:center;justify-content:center;gap:28px;margin-top:10px}
+.cbtn{width:50px;height:50px;border-radius:50%;background:var(--card);border:1px solid var(--line);display:grid;place-items:center}
 .cbtn svg{width:22px;height:22px;fill:var(--txt)}
-.play{width:88px;height:88px;border-radius:50%;background:var(--phase);display:grid;place-items:center;box-shadow:0 10px 40px color-mix(in srgb,var(--phase) 45%,transparent);transition:background .4s,box-shadow .4s}
+.play{width:min(76px,10vh);height:min(76px,10vh);border-radius:50%;background:var(--phase);display:grid;place-items:center;box-shadow:0 10px 40px color-mix(in srgb,var(--phase) 45%,transparent);transition:background .4s,box-shadow .4s}
 .play svg{width:34px;height:34px;fill:#07080b}
 
-.ledcard{margin-top:22px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px}
-.ledcard .h{display:flex;justify-content:space-between;font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:8px}
-#led{width:100%;display:block;border-radius:8px;background:#000}
+.ledcard{margin-top:10px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:8px}
+.ledcard .h{display:flex;justify-content:space-between;font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:5px}
+#led{width:100%;max-height:11vh;object-fit:contain;display:block;border-radius:6px;background:#000}
 
 /* cards / settings */
-.title{font-family:var(--cond);font-weight:800;font-size:34px;text-transform:uppercase;letter-spacing:.5px;margin:6px 0 14px;font-style:italic}
-.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:6px 16px;margin-bottom:14px}
-.card.pad{padding:16px}
+.title{font-family:var(--cond);font-weight:800;font-size:26px;text-transform:uppercase;letter-spacing:.5px;margin:2px 0 8px;font-style:italic;display:flex;justify-content:space-between;align-items:baseline}.title small{font-size:14px;font-style:normal;color:var(--mut);letter-spacing:0;text-transform:none;font-family:Inter,sans-serif;font-weight:500}.title small b{color:var(--txt);font-family:var(--cond);font-size:22px;font-weight:800}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:2px 14px;margin-bottom:10px}
+.card.pad{padding:12px 14px}
 .lbl{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:1.4px;margin:0 0 10px;font-weight:600}
-.stepper{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line)}
+.stepper{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line)}
 .stepper:last-child{border-bottom:0}
 .stepper .n{display:flex;align-items:center;gap:12px}
 .stepper .sw{width:10px;height:10px;border-radius:3px}
 .stepper .t{font-weight:600}
 .stepper .ctl{display:flex;align-items:center;gap:6px}
-.stepper .ctl button{width:38px;height:38px;border-radius:11px;background:var(--card2);border:1px solid var(--line);font-size:20px;font-weight:600;display:grid;place-items:center}
-.stepper .v{font-family:var(--cond);font-weight:700;font-size:24px;min-width:58px;text-align:center;font-variant-numeric:tabular-nums}
-.presets{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
-.preset{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;text-align:left}
-.preset b{display:block;font-family:var(--cond);font-size:22px;font-weight:800;text-transform:uppercase;font-style:italic}
+.stepper .ctl button{width:36px;height:36px;border-radius:11px;background:var(--card2);border:1px solid var(--line);font-size:20px;font-weight:600;display:grid;place-items:center}
+.stepper .v{font-family:var(--cond);font-weight:700;font-size:21px;min-width:52px;text-align:center;font-variant-numeric:tabular-nums}
+.presets{display:flex;gap:8px;overflow-x:auto;margin:0 -16px 10px;padding:2px 16px;scrollbar-width:none;-webkit-overflow-scrolling:touch}.presets::-webkit-scrollbar{display:none}.preset.mine b::before{content:"★ ";color:var(--prep);font-style:normal}.preset .del{position:absolute;top:0;right:0;width:30px;height:30px;color:var(--mut);font-size:18px}.preset.add{border-style:dashed;min-width:96px}.preset.add b{font-style:normal}.savebar{display:none;gap:8px;margin-bottom:10px}.savebar.show{display:flex}
+.preset{position:relative;flex:none;min-width:138px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:8px 26px 8px 12px;text-align:left;cursor:pointer}
+.preset b{display:block;font-family:var(--cond);font-size:18px;line-height:1.2;font-weight:800;text-transform:uppercase;font-style:italic}
 .preset span{font-size:12px;color:var(--mut)}
 .preset.sel{border-color:var(--phase);box-shadow:inset 0 0 0 1px var(--phase)}
 .total{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:var(--card2);border-radius:14px;margin-bottom:14px}
 .total b{font-family:var(--cond);font-size:28px;font-weight:800}
-.row{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--line)}
+.row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line)}
 .row:last-child{border-bottom:0}
 .row small{display:block;color:var(--mut);font-size:12px}
 .sw-t{position:relative;width:50px;height:30px;flex:none}
@@ -92,20 +92,20 @@ button:active{transform:scale(.96)}
 .sw-t span::after{content:"";position:absolute;left:3px;top:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:.2s}
 .sw-t input:checked+span{background:var(--rest)}
 .sw-t input:checked+span::after{transform:translateX(20px)}
-.btn{width:100%;padding:15px;border-radius:14px;font-weight:700;font-size:16px;background:var(--card2);border:1px solid var(--line)}
+.btn{width:100%;padding:12px;border-radius:14px;font-weight:700;font-size:16px;background:var(--card2);border:1px solid var(--line)}
 .btn.pri{background:var(--txt);color:#07080b;border:0}
-.btn+.btn{margin-top:10px}
+.btn+.btn{margin-top:8px}
 input[type=range]{width:100%;accent-color:var(--txt);margin:6px 0 4px}
 input[type=text]{width:100%;font:600 18px Inter,sans-serif;text-transform:uppercase;background:var(--card2);color:var(--txt);border:1px solid var(--line);border-radius:12px;padding:13px;user-select:text;-webkit-user-select:text}
 .seg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;background:var(--card2);padding:4px;border-radius:12px}
 .seg button{padding:9px 0;border-radius:9px;font-weight:600;font-size:13px;color:var(--mut)}
 .seg button.sel{background:var(--txt);color:#07080b}
-.warn{background:#1d1608;border:1px solid #4d3a10;color:#ffd77a;border-radius:16px;padding:14px;font-size:14px;margin:10px 0 14px}
+.warn{position:relative;background:#1d1608;border:1px solid #4d3a10;color:#ffd77a;border-radius:12px;padding:8px 34px 8px 12px;font-size:12px;margin:4px 0 6px}.warn .x{position:absolute;right:6px;top:4px;color:#ffd77a;font-size:18px;padding:2px 8px}
 .warn b{color:#fff}
 
 /* tabbar */
-.tabs{position:fixed;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom) + 10px);background:rgba(17,19,24,.88);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid var(--line);border-radius:22px;display:flex;padding:6px;z-index:5}
-.tabs button{flex:1;padding:9px 0 7px;border-radius:16px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:600;color:var(--mut)}
+.tabs{position:fixed;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom) + 6px);background:rgba(17,19,24,.88);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid var(--line);border-radius:22px;display:flex;padding:6px;z-index:5}
+.tabs button{flex:1;padding:6px 0 5px;border-radius:16px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:600;color:var(--mut)}
 .tabs svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .tabs button.act{color:var(--txt);background:#1e2129}
 .toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 8px);transform:translate(-50%,-140%);background:#1b1e26;border:1px solid var(--line);padding:10px 16px;border-radius:14px;font-size:14px;font-weight:500;transition:transform .3s;z-index:10;white-space:nowrap}
@@ -120,7 +120,7 @@ input[type=text]{width:100%;font:600 18px Inter,sans-serif;text-transform:upperc
 </div>
 
 <div class="warn" id="noBle" style="display:none">
-  <b>Bluetooth is hier niet beschikbaar.</b> Safari en Chrome op iPhone geven websites geen toegang tot Bluetooth. Open deze pagina in de gratis app <b>Bluefy – Web BLE Browser</b>. De timer zelf werkt overal.
+  <b>Geen Bluetooth in deze browser.</b> Open de pagina in <b>Bluefy</b> voor het LED-bord. De timer werkt overal.<button class="x" onclick="this.parentNode.style.display='none'">×</button>
 </div>
 
 <!-- ================= TIMER ================= -->
@@ -152,43 +152,38 @@ input[type=text]{width:100%;font:600 18px Inter,sans-serif;text-transform:upperc
 
 <!-- ================= SCHEMA ================= -->
 <section class="view" id="v-plan">
-  <div class="title">Schema</div>
+  <div class="title">Schema<small>Totaal <b id="totalT">0:00</b></small></div>
   <div class="presets" id="presets"></div>
+  <div class="savebar" id="saveBar"><input type="text" id="favName" placeholder="Naam, bijv. Benen" maxlength="18" style="text-transform:none"><button class="btn pri" id="favSave" style="width:auto;padding:12px 16px">Bewaar</button><button class="btn" id="favCancel" style="width:auto;padding:12px 14px;margin-top:0">✕</button></div>
   <div class="card" id="steppers"></div>
-  <div class="total"><span>Totale duur</span><b id="totalT">0:00</b></div>
-  <div class="card">
-    <div class="row"><div>Geluid<small>Piepjes bij 3-2-1 en faseswitch</small></div><label class="sw-t"><input type="checkbox" id="optSound" checked><span></span></label></div>
-    <div class="row"><div>Scherm aan houden<small>Tijdens de training</small></div><label class="sw-t"><input type="checkbox" id="optWake" checked><span></span></label></div>
-  </div>
 </section>
 
 <!-- ================= BORD ================= -->
 <section class="view" id="v-board">
-  <div class="title">LED-bord</div>
+  
   <div class="card pad">
-    <p class="lbl">Verbinding</p>
-    <button class="btn pri" id="bConnect">Verbinden met bord</button>
-    <button class="btn" id="bDisc">Verbreken</button>
-  </div>
-  <div class="card pad">
-    <p class="lbl">Helderheid <span id="brV" style="color:var(--txt)">70%</span></p>
+    <div style="display:flex;gap:8px"><button class="btn pri" id="bConnect">Verbinden</button><button class="btn" id="bDisc" style="margin-top:0">Verbreken</button></div>
+    <div style="display:flex;gap:8px;margin-top:8px"><button class="btn" id="pOn">Bord aan</button><button class="btn" id="pOff" style="margin-top:0">Bord uit</button></div>
+    <p class="lbl" style="margin:12px 0 0">Helderheid <span id="brV" style="color:var(--txt)">70%</span></p>
     <input type="range" id="bright" min="5" max="100" value="70">
-    <div style="display:flex;gap:10px;margin-top:10px"><button class="btn" id="pOn">Aan</button><button class="btn" id="pOff" style="margin-top:0">Uit</button></div>
   </div>
   <div class="card pad">
     <p class="lbl">Bericht op het bord</p>
-    <input type="text" id="msg" maxlength="16" value="LETS GO!">
-    <button class="btn pri" id="bMsg" style="margin-top:10px">Tonen</button>
+    <div style="display:flex;gap:8px"><input type="text" id="msg" maxlength="16" value="LETS GO!"><button class="btn pri" id="bMsg" style="width:auto;padding:12px 18px">Tonen</button></div>
   </div>
   <div class="card pad">
     <p class="lbl">Draaien</p>
     <div class="seg" id="orient"><button class="sel" data-v="0">0°</button><button data-v="1">90°</button><button data-v="2">180°</button><button data-v="3">270°</button></div>
   </div>
   <div class="card">
+    <div class="row"><div>Geluid<small>Piepjes bij 3-2-1 en faseswitch</small></div><label class="sw-t"><input type="checkbox" id="optSound" checked><span></span></label></div>
+    <div class="row"><div>Scherm aan houden<small>Tijdens de training</small></div><label class="sw-t"><input type="checkbox" id="optWake" checked><span></span></label></div>
+  </div>
+  <div class="card">
     <div class="row"><div>Alle apparaten tonen<small>Als het bord niet in de lijst staat</small></div><label class="sw-t"><input type="checkbox" id="allDev"><span></span></label></div>
     <div class="row"><div>Veilige verzendmodus<small>Langzamer, maar betrouwbaarder</small></div><label class="sw-t"><input type="checkbox" id="safeMode"><span></span></label></div>
   </div>
-  <p style="font-size:12px;color:var(--mut);text-align:center">Sluit de iPixel Color-app af; het bord accepteert één verbinding tegelijk.</p>
+  
 </section>
 
 <nav class="tabs">
@@ -206,28 +201,47 @@ let tT;function toast(m){const t=$('toast');t.textContent=m;t.classList.add('sho
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const fmt=s=>{s=Math.max(0,Math.ceil(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
 const W=64,H=16;
-const PH={prep:{name:'Klaar maken',led:'START',col:'#ffcc00',css:'--prep'},work:{name:'Werk',led:'WERK',col:'#ff2a1f',css:'--work'},rest:{name:'Rust',led:'RUST',col:'#18e070',css:'--rest'},setrest:{name:'Setpauze',led:'PAUZE',col:'#2ea8ff',css:'--setrest'},done:{name:'Klaar!',led:'TOP!',col:'#c6ff00',css:'--done'}};
+const PH={prep:{name:'Gereed',led:'START',col:'#ffcc00',css:'--prep'},work:{name:'Werk',led:'WERK',col:'#ff2a1f',css:'--work'},rest:{name:'Rust',led:'RUST',col:'#18e070',css:'--rest'},setrest:{name:'Setpauze',led:'PAUZE',col:'#2ea8ff',css:'--setrest'},done:{name:'Klaar!',led:'TOP!',col:'#c6ff00',css:'--done'}};
 
-/* ============ settings ============ */
+/* ============ settings & favourites ============ */
 const DEF={prep:10,work:20,rest:10,rounds:8,sets:1,setrest:60};
+const KEYS=Object.keys(DEF);
 let cfg=Object.assign({},DEF,store.get('cfg',{}));
 const PRESETS=[
-  {n:'Klassiek',d:'20s / 10s · 8 rondes',c:{work:20,rest:10,rounds:8,sets:1}},
-  {n:'Starter',d:'15s / 15s · 8 rondes',c:{work:15,rest:15,rounds:8,sets:1}},
-  {n:'Pittig',d:'30s / 15s · 8 rondes',c:{work:30,rest:15,rounds:8,sets:1}},
-  {n:'Dubbel',d:'20s / 10s · 8 × 2 sets',c:{work:20,rest:10,rounds:8,sets:2}},
+  {n:'Klassiek',c:{prep:10,work:20,rest:10,rounds:8,sets:1,setrest:60}},
+  {n:'Starter',c:{prep:10,work:15,rest:15,rounds:8,sets:1,setrest:60}},
+  {n:'Pittig',c:{prep:10,work:30,rest:15,rounds:8,sets:1,setrest:60}},
+  {n:'Dubbel',c:{prep:10,work:20,rest:10,rounds:8,sets:2,setrest:60}},
 ];
+let favs=store.get('favs',[]);
 const STEPS=[
   {k:'prep',t:'Voorbereiding',c:'--prep',min:0,max:60,st:5,s:true},
-  {k:'work',t:'Werk',c:'--work',min:5,max:300,st:5,s:true},
-  {k:'rest',t:'Rust',c:'--rest',min:0,max:300,st:5,s:true},
+  {k:'work',t:'Werk',c:'--work',min:5,max:600,st:5,s:true},
+  {k:'rest',t:'Rust',c:'--rest',min:0,max:600,st:5,s:true},
   {k:'rounds',t:'Rondes',c:'--txt',min:1,max:30,st:1},
   {k:'sets',t:'Sets',c:'--txt',min:1,max:10,st:1},
-  {k:'setrest',t:'Pauze tussen sets',c:'--setrest',min:0,max:300,st:15,s:true},
+  {k:'setrest',t:'Pauze tussen sets',c:'--setrest',min:0,max:600,st:15,s:true},
 ];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const desc=c=>`${c.work}s / ${c.rest}s · ${c.rounds} rondes`+(c.sets>1?` · ${c.sets} sets`:'');
+const same=c=>KEYS.every(k=>cfg[k]===c[k]);
 function renderPlan(){
-  $('presets').innerHTML='';
-  PRESETS.forEach(p=>{const b=document.createElement('button');b.className='preset'+(Object.keys(p.c).every(k=>cfg[k]===p.c[k])?' sel':'');b.innerHTML=`<b>${p.n}</b><span>${p.d}</span>`;b.onclick=()=>{Object.assign(cfg,p.c);saveCfg()};$('presets').appendChild(b)});
+  const box=$('presets');box.innerHTML='';
+  const add=(p,i)=>{
+    const b=document.createElement('div');b.className='preset'+(same(p.c)?' sel':'')+(i!=null?' mine':'');
+    b.innerHTML=`<b>${esc(p.n)}</b><span>${desc(p.c)}</span>`+(i!=null?'<button class="del" aria-label="Verwijder">×</button>':'');
+    b.onclick=e=>{
+      if(e.target.classList.contains('del')){favs.splice(i,1);store.set('favs',favs);renderPlan();toast('Favoriet verwijderd');return}
+      if(running)return toast('Stop eerst de timer');
+      Object.assign(cfg,p.c);saveCfg();toast(p.n+' gekozen');
+    };
+    box.appendChild(b);
+  };
+  favs.forEach((p,i)=>add(p,i));
+  PRESETS.forEach(p=>add(p,null));
+  const plus=document.createElement('div');plus.className='preset add';plus.innerHTML='<b>＋</b><span>Huidige opslaan</span>';
+  plus.onclick=()=>{$('saveBar').classList.add('show');$('favName').focus()};
+  box.insertBefore(plus,box.firstChild);
   $('steppers').innerHTML='';
   STEPS.forEach(s=>{
     const r=document.createElement('div');r.className='stepper';
@@ -239,10 +253,17 @@ function renderPlan(){
   });
   $('totalT').textContent=fmt(buildSegs().reduce((a,s)=>a+s.dur,0));
 }
+function saveFav(){
+  const n=$('favName').value.trim();if(!n)return toast('Geef je training een naam');
+  const c={};KEYS.forEach(k=>c[k]=cfg[k]);
+  const ex=favs.findIndex(f=>f.n.toLowerCase()===n.toLowerCase());
+  if(ex>=0)favs[ex]={n,c};else favs.unshift({n,c});
+  store.set('favs',favs);$('favName').value='';$('saveBar').classList.remove('show');$('favName').blur();renderPlan();toast('⭐ '+n+' opgeslagen');
+}
 function hold(el,fn){let t,i;const stop=()=>{clearTimeout(t);clearInterval(i)};el.addEventListener('pointerdown',e=>{e.preventDefault();fn();t=setTimeout(()=>i=setInterval(fn,90),400)});['pointerup','pointerleave','pointercancel'].forEach(ev=>el.addEventListener(ev,stop))}
 function saveCfg(){store.set('cfg',cfg);renderPlan();resetTimer()}
 
-/* ============ timer engine ============ */
+/* ============ timer engine (wall-clock based, survives closing the app) ============ */
 function buildSegs(){
   const s=[];if(cfg.prep>0)s.push({type:'prep',dur:cfg.prep,round:0,set:1});
   for(let st=1;st<=cfg.sets;st++){
@@ -254,58 +275,96 @@ function buildSegs(){
   }
   return s;
 }
-let segs=[],idx=0,segStart=0,pausedAt=0,running=false,finished=false,raf=null,lastSec=-1,wakeLock=null;
-function curElapsed(){return ((running?performance.now():pausedAt)-segStart)/1000}
+let segs=[],cum=[],total=0,t0=0,pausedE=0,running=false,boardMode=false,uploading=false,upPct=0,raf=null,lastKey='',lastIdx=-1,lastTick=0,catching=false,wakeLock=null;
+function rebuild(){segs=buildSegs();cum=[];let a=0;segs.forEach(s=>{cum.push(a);a+=s.dur});total=a}
+const E=()=>running?(Date.now()-t0)/1000:pausedE;
+function pos(e){if(e>=total)return{idx:segs.length-1,el:segs[segs.length-1].dur,done:true};let i=0;while(i<segs.length-1&&e>=cum[i+1])i++;return{idx:i,el:e-cum[i],done:false}}
+const saveRun=()=>store.set('run',{cfg,t0,pausedE,running,boardMode});
 function resetTimer(){
-  running=false;finished=false;cancelAnimationFrame(raf);segs=buildSegs();idx=0;segStart=performance.now();pausedAt=segStart;lastSec=-1;
-  setPlayIcon(false);releaseWake();render(true);
+  running=false;boardMode=false;cancelAnimationFrame(raf);rebuild();pausedE=0;lastKey='';lastIdx=-1;store.set('run',null);
+  setPlayIcon(false);releaseWake();render();
 }
-function start(){
-  initAudio();
-  if(finished)resetTimer();
-  const now=performance.now();segStart+=now-pausedAt;running=true;setPlayIcon(true);requestWake();
-  if(idx===0&&curElapsed()<0.05)phaseCue(segs[0].type);
+async function start(){
+  if(uploading||running)return;initAudio();
+  if(pausedE>=total){resetTimer()}
+  const p=pos(pausedE),sg=segs[p.idx],rem=Math.max(1,Math.ceil(sg.dur-p.el-1e-6));
+  pausedE=cum[p.idx]+sg.dur-rem; // snap to whole seconds
+  boardMode=false;
+  if(chW){boardMode=await uploadWorkout(pausedE)}
+  t0=Date.now()-pausedE*1000;running=true;setPlayIcon(true);requestWake();saveRun();
+  if(pausedE===0)phaseCue(segs[0].type);
+  lastIdx=pos(pausedE).idx;lastTick=Date.now();lastKey='';
   loop();
 }
-function pause(){running=false;pausedAt=performance.now();cancelAnimationFrame(raf);setPlayIcon(false);render(true);releaseWake()}
-function skip(){if(finished)return;const now=running?performance.now():pausedAt;segStart=now-segs[idx].dur*1000;if(!running){advance();render(true)}}
-function advance(){
-  while(idx<segs.length&&curElapsed()>=segs[idx].dur){
-    segStart+=segs[idx].dur*1000;idx++;
-    if(idx>=segs.length){finish();return}
-    phaseCue(segs[idx].type);
-  }
+function pause(){if(!running)return;pausedE=E();running=false;cancelAnimationFrame(raf);setPlayIcon(false);saveRun();lastKey='';render();releaseWake()}
+function skip(){
+  if(uploading)return;const was=running;
+  if(running){pausedE=E();running=false;cancelAnimationFrame(raf)}
+  if(pausedE>=total)return;
+  const p=pos(pausedE);pausedE=cum[p.idx]+segs[p.idx].dur;lastIdx=p.idx+1;
+  if(was&&pausedE<total)start();else{setPlayIcon(false);saveRun();lastKey='';render()}
 }
-function finish(){running=false;finished=true;cancelAnimationFrame(raf);setPlayIcon(false);releaseWake();beep(1046,.18);setTimeout(()=>beep(1318,.18),200);setTimeout(()=>beep(1568,.45),400);render(true)}
-function loop(){advance();if(!running)return;render();raf=requestAnimationFrame(loop)}
+function finish(silent){
+  running=false;pausedE=total;cancelAnimationFrame(raf);setPlayIcon(false);releaseWake();store.set('run',null);
+  if(!silent){beep(1046,.18);setTimeout(()=>beep(1318,.18),200);setTimeout(()=>beep(1568,.45),400)}
+  lastKey='';render();
+}
+function loop(){
+  const now=Date.now();catching=now-lastTick>1500;lastTick=now;
+  const e=E();if(e>=total){finish(catching);return}
+  const p=pos(e);if(p.idx!==lastIdx){if(!catching)phaseCue(segs[p.idx].type);lastIdx=p.idx}
+  render();raf=requestAnimationFrame(loop);
+}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&running){lastTick=0;requestWake()}});
 
 const RING=854.5;
-function render(force){
-  let type,remain,seg,frac;
-  if(finished){type="done";remain=0;frac=0;seg={round:cfg.rounds,set:cfg.sets}}
-  else{seg=segs[idx]||{type:'done',dur:0,round:0,set:1};type=seg.type;remain=Math.max(0,seg.dur-curElapsed());frac=seg.dur?1-remain/seg.dur:0}
-  const idle=!running&&!finished&&idx===0&&curElapsed()<0.05;
+function render(){
+  const e=E(),finished=e>=total&&total>0,p=pos(e),seg=segs[p.idx];
+  const type=finished?'done':seg.type,remain=finished?0:Math.max(0,seg.dur-p.el),frac=finished?0:1-remain/seg.dur;
+  const idle=!running&&pausedE===0;
   document.documentElement.style.setProperty('--phase',`var(${PH[type].css})`);
-  $('phase').textContent=idle?'Klaar?':(!running&&!finished?'Pauze':PH[type].name);
   const sec=Math.ceil(remain);
+  if(uploading){
+    $('phase').textContent='Laden';$('secs').textContent=upPct+'%';$('sub').textContent='Training naar het bord…';$('ring').style.strokeDashoffset=RING*(1-upPct/100);return;
+  }
+  $('phase').textContent=idle?'Klaar?':(!running&&!finished?'Pauze':PH[type].name);
   $('secs').textContent=finished?'✓':(sec>=60?fmt(sec):sec);
   $('sub').textContent=finished?'Goed gedaan 💪':idle?'Druk op start':(type==='work'?'Alles geven!':type==='rest'?'Even ademen':type==='prep'?'Maak je klaar':'Herstel');
   $('ring').style.strokeDashoffset=RING*frac;
-  const rd=type==='prep'?0:seg.round;
-  $('mRound').textContent=`${rd}/${cfg.rounds}`;$('mSet').textContent=`${seg.set}/${cfg.sets}`;
-  let left=finished?0:remain;for(let i=idx+1;i<segs.length;i++)left+=segs[i].dur;$('mLeft').textContent=fmt(left);
+  const rd=type==='prep'?0:(finished?cfg.rounds:seg.round),st=finished?cfg.sets:seg.set;
+  $('mRound').textContent=`${rd}/${cfg.rounds}`;$('mSet').textContent=`${st}/${cfg.sets}`;
+  $('mLeft').textContent=fmt(Math.max(0,total-e));
   const rr=$('rounds');if(rr.children.length!==cfg.rounds){rr.innerHTML='';for(let i=0;i<cfg.rounds;i++)rr.appendChild(document.createElement('i'))}
   [...rr.children].forEach((d,i)=>{const n=i+1;d.className=finished||n<rd||(n===rd&&type!=='work')?'done':(n===rd?'cur':'')});
-  // countdown beeps + board update once per second
-  const key=finished?'done':idx+':'+sec+':'+(running?1:0);
-  if(key!==lastSec){
-    if(running&&sec<=3&&sec>=1&&remain>0&&type!=='done')beep(880,.09);
-    lastSec=key;
-    const f=boardFrame(idle?'idle':type,sec,frac,seg,!running&&!finished&&!idle);
-    drawLED(f);queueBoard(f);
+  $('ledState').textContent=!chW?'niet verbonden':(running&&boardMode?'loopt zelfstandig':'live');
+  const key=finished?'done':p.idx+':'+sec+':'+(running?1:0);
+  if(key!==lastKey){
+    if(running&&!catching&&sec<=3&&sec>=1)beep(880,.09);
+    lastKey=key;
+    const f=boardFrame(idle?'idle':type,sec,frac,seg||{round:0,set:1},!running&&!finished&&!idle);
+    drawLED(f);
+    if(!(running&&boardMode))queueBoard(f); // in board mode the board plays the whole workout itself
   }
 }
 function setPlayIcon(p){$('playIcon').innerHTML=p?'<path d="M7 5h4v14H7zM13 5h4v14h-4z"/>':'<path d="M8 5v14l11-7z"/>'}
+
+/* Build the rest of the workout as one animated GIF (1 frame per second) and upload it,
+   so the board keeps counting even when the phone app is closed or locked. */
+async function uploadWorkout(e0){
+  uploading=true;upPct=0;render();
+  try{
+    const frames=[],delays=[];const p=pos(e0);
+    for(let i=p.idx;i<segs.length;i++){
+      const s=segs[i],r=i===p.idx?Math.round(s.dur-p.el):s.dur;
+      for(let sec=r;sec>=1;sec--){frames.push(boardFrame(s.type,sec,(s.dur-sec)/s.dur,s,false));delays.push(100)}
+    }
+    const top=boardFrame('done',0,1,{},false);for(let i=0;i<6;i++){frames.push(top);delays.push(60000)}
+    const gif=encodeGIF(frames,delays);
+    await sendMedia(gif,true,pct=>{upPct=pct;render()});
+    return true;
+  }catch(e){console.warn(e);toast('Bord-upload mislukt, timer loopt live');return false}
+  finally{uploading=false;lastKey=''}
+}
 
 /* ============ audio / wake ============ */
 let actx=null;
@@ -314,7 +373,6 @@ function beep(f,d){if(!$('optSound').checked||!actx)return;try{const o=actx.crea
 function phaseCue(t){if(t==='work')beep(1320,.45);else if(t==='rest'||t==='setrest')beep(660,.45);else if(t==='prep')beep(990,.15)}
 async function requestWake(){if(!$('optWake').checked)return;try{wakeLock=await navigator.wakeLock.request('screen')}catch(e){}}
 function releaseWake(){try{wakeLock&&wakeLock.release();wakeLock=null}catch(e){}}
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&running)requestWake()});
 
 /* ============ pixel font (3x5) ============ */
 const FONT={'0':[7,5,5,5,7],'1':[2,6,2,2,7],'2':[7,1,7,4,7],'3':[7,1,7,1,7],'4':[5,5,7,1,1],'5':[7,4,7,1,7],'6':[7,4,7,5,7],'7':[7,1,1,2,2],'8':[7,5,7,5,7],'9':[7,5,7,1,7],
@@ -351,6 +409,36 @@ function boardFrame(kind,sec,frac,seg,paused){
 }
 function msgFrame(s){const b=newBuf();s=s.toUpperCase().slice(0,16);let sc=tw(s,2)<=W?2:1;const c=hex('#c6ff00');text(b,s,Math.floor((W-tw(s,sc))/2),sc===2?3:5,sc,c);return b}
 
+/* ============ GIF encoder ============ */
+function encodeGIF(frames,delays){
+  const map=new Map(),pal=[];
+  for(const f of frames)for(let i=0;i<f.length;i+=4){const k=(f[i]<<16)|(f[i+1]<<8)|f[i+2];if(!map.has(k)){map.set(k,pal.length);pal.push(k)}}
+  if(pal.length>256)throw new Error('te veel kleuren');
+  let bits=1;while((1<<bits)<pal.length)bits++;if(bits<2)bits=2;
+  while(pal.length<(1<<bits))pal.push(0);
+  const out=[];const u16=v=>out.push(v&255,(v>>8)&255);
+  for(const c of 'GIF89a')out.push(c.charCodeAt(0));
+  u16(W);u16(H);out.push(0xF0|(bits-1),0,0);
+  for(const c of pal)out.push((c>>16)&255,(c>>8)&255,c&255);
+  frames.forEach((f,n)=>{
+    const ix=new Uint8Array(W*H);for(let p=0,i=0;p<ix.length;p++,i+=4)ix[p]=map.get((f[i]<<16)|(f[i+1]<<8)|f[i+2]);
+    out.push(0x21,0xF9,4,0x04);u16(delays[n]);out.push(0,0);
+    out.push(0x2C);u16(0);u16(0);u16(W);u16(H);out.push(0);
+    out.push(bits);const d=lzw(ix,bits);
+    for(let i=0;i<d.length;i+=255){const k=Math.min(255,d.length-i);out.push(k);for(let j=0;j<k;j++)out.push(d[i+j])}
+    out.push(0);
+  });
+  out.push(0x3B);return new Uint8Array(out);
+}
+function lzw(ix,minCode){
+  const clear=1<<minCode,eoi=clear+1;let size=minCode+1,next=eoi+1,dict=new Map();const out=[];let buf=0,cnt=0;
+  const emit=c=>{buf|=c<<cnt;cnt+=size;while(cnt>=8){out.push(buf&255);buf>>>=8;cnt-=8}};
+  emit(clear);let cur=ix[0];
+  for(let i=1;i<ix.length;i++){const k=ix[i],key=(cur<<8)|k,f=dict.get(key);if(f!==undefined){cur=f;continue}
+    emit(cur);if(next===4096){emit(clear);dict=new Map();size=minCode+1;next=eoi+1}else{if(next>=(1<<size))size++;dict.set(key,next++)}cur=k}
+  emit(cur);emit(eoi);if(cnt>0)out.push(buf&255);return out;
+}
+
 /* ============ LED preview ============ */
 const led=$('led'),lx=led.getContext('2d');
 function drawLED(f){const s=led.width/W,r=s*.4;lx.fillStyle='#000';lx.fillRect(0,0,led.width,led.height);for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=(y*W+x)*4,R=f[i],G=f[i+1],B=f[i+2],on=R|G|B;lx.fillStyle=on?`rgb(${R},${G},${B})`:'#121317';if(on){lx.shadowColor=`rgb(${R},${G},${B})`;lx.shadowBlur=6}else lx.shadowBlur=0;lx.beginPath();lx.arc(x*s+s/2,y*s+s/2,r,0,6.2832);lx.fill()}lx.shadowBlur=0}
@@ -375,21 +463,28 @@ async function connect(){
     try{chN=await svc.getCharacteristic(CH_N);await chN.startNotifications();chN.addEventListener('characteristicvaluechanged',e=>{const v=new Uint8Array(e.target.value.buffer);if(v.length>=5&&v[0]===5&&v[1]===0&&ackW){const w=ackW;ackW=null;w(v[4])}})}catch(e){chN=null}
     setConn(true,'Verbonden');toast('LED-bord verbonden ✅');
     await cmd(0x07,0x01,[1]);await cmd(0x04,0x80,[+$('bright').value]);
-    lastSec=-1;render(true);
+    lastKey='';render();
   }catch(e){setConn(false,'LED-bord');if(e.name!=='NotFoundError')toast('Fout: '+e.message)}
 }
 const waitAck=ms=>new Promise(res=>{const fn=s=>{clearTimeout(t);res(s)};const t=setTimeout(()=>{if(ackW===fn)ackW=null;res(-1)},ms);ackW=fn});
 async function wr(b,resp){if(resp||!chW.writeValueWithoutResponse)return chW.writeValueWithResponse?chW.writeValueWithResponse(b):chW.writeValue(b);return chW.writeValueWithoutResponse(b)}
 async function cmd(c,t,p=[]){if(!chW)return;const n=4+p.length;await wr(new Uint8Array([n&255,n>>8,c,t,...p]),true)}
-async function sendPNG(data){
-  const size=data.length,crc=crc32(data),safe=$('safeMode').checked,CH=safe?120:180;
+// generic iPixel media upload: PNG (still) or GIF (animation), 12 KB windows, ack per window
+async function sendMedia(data,isGif,onPct){
+  const WIN=12*1024,size=data.length,crc=crc32(data),safe=$('safeMode').checked,CH=safe?120:180;
   const le=v=>[v&255,(v>>>8)&255,(v>>>16)&255,(v>>>24)&255];
-  const head=[2,0,0,...le(size),...le(crc),0,0],tot=head.length+size+2;
-  const buf=new Uint8Array(tot);buf[0]=tot&255;buf[1]=tot>>8;buf.set(head,2);buf.set(data,2+head.length);
-  const ack=chN?waitAck(1500):null;let n=0;
-  for(let i=0;i<buf.length;i+=CH){n++;await wr(buf.subarray(i,i+CH),safe||i+CH>=buf.length||n%8===0)}
-  if(ack)await ack;else await sleep(80);
+  let sent=0;
+  for(let off=0;off<size;off+=WIN){
+    const win=data.subarray(off,Math.min(size,off+WIN));
+    const head=[isGif?3:2,0,off===0?0:2,...le(size),...le(crc),isGif?2:0,0],tot=head.length+win.length+2;
+    const buf=new Uint8Array(tot);buf[0]=tot&255;buf[1]=(tot>>8)&255;buf.set(head,2);buf.set(win,2+head.length);
+    const ack=chN?waitAck(isGif?8000:1500):null;let n=0;
+    for(let i=0;i<buf.length;i+=CH){n++;await wr(buf.subarray(i,i+CH),safe||i+CH>=buf.length||n%8===0);sent+=Math.min(CH,buf.length-i);onPct&&onPct(Math.min(99,Math.round(sent/(size+15)*100)))}
+    if(ack){const s=await ack;if(s===3)break}else await sleep(isGif?200:80);
+  }
+  onPct&&onPct(100);
 }
+const sendPNG=d=>sendMedia(d,false);
 const pngCanvas=document.createElement('canvas');pngCanvas.width=W;pngCanvas.height=H;
 async function toPNG(f){pngCanvas.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(f),W,H),0,0);const bl=await new Promise(r=>pngCanvas.toBlob(r,'image/png'));return new Uint8Array(await bl.arrayBuffer())}
 // latest-frame-wins queue so the board never lags behind the timer
@@ -399,6 +494,7 @@ async function pump(){sending=true;while(pending&&chW){const f=pending;pending=n
 
 /* ============ wiring ============ */
 $('bPlay').onclick=()=>running?pause():start();
+$('favSave').onclick=saveFav;$('favCancel').onclick=()=>$('saveBar').classList.remove('show');$('favName').addEventListener('keydown',e=>{if(e.key==='Enter')saveFav()});
 $('bReset').onclick=resetTimer;
 $('bSkip').onclick=skip;
 $('pill').onclick=()=>chW?showTab('board'):connect();
@@ -413,7 +509,13 @@ document.querySelectorAll('#orient button').forEach(b=>b.onclick=()=>{document.q
 function showTab(t){document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('act',x.dataset.t===t));document.querySelectorAll('.view').forEach(v=>v.classList.toggle('act',v.id==='v-'+t));if(t==='plan')renderPlan()}
 document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>showTab(b.dataset.t));
 if(!navigator.bluetooth)$('noBle').style.display='block';
-renderPlan();resetTimer();
+renderPlan();
+(()=>{const r=store.get('run',null);
+  if(r&&KEYS.every(k=>r.cfg&&r.cfg[k]===cfg[k])){rebuild();boardMode=!!r.boardMode;
+    if(r.running){t0=r.t0;running=true;if(E()>=total)finish(true);else{setPlayIcon(true);lastIdx=pos(E()).idx;lastTick=0;loop()}}
+    else{pausedE=r.pausedE||0;render()}
+  }else resetTimer();
+})();
 </script>
 </body>
 </html>
