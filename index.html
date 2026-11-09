@@ -18,7 +18,7 @@
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font:15px/1.4 Inter,-apple-system,system-ui,sans-serif}
-body{padding:calc(env(safe-area-inset-top) + 6px) 16px calc(env(safe-area-inset-bottom) + 80px);overflow-x:hidden}
+body{padding:calc(env(safe-area-inset-top) + 6px) 16px 0;overflow-x:hidden}.view.act::after{content:"";display:block;height:calc(env(safe-area-inset-bottom) + 110px)}
 body::before{content:"";position:fixed;inset:-20%;background:radial-gradient(60% 45% at 50% 30%,color-mix(in srgb,var(--phase) 22%,transparent),transparent 70%);transition:background .6s;z-index:-1;pointer-events:none}
 button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 button:active{transform:scale(.96)}
@@ -170,16 +170,12 @@ input[type=text]{width:100%;font:600 18px Inter,sans-serif;text-transform:upperc
   <div class="card pad">
     <p class="lbl">Bericht op het bord</p>
     <div style="display:flex;gap:8px"><input type="text" id="msg" maxlength="16" value="LETS GO!"><button class="btn pri" id="bMsg" style="width:auto;padding:12px 18px">Tonen</button></div>
-  </div>
-  <div class="card pad">
-    <p class="lbl">Draaien</p>
+    <p class="lbl" style="margin-top:12px">Draaien</p>
     <div class="seg" id="orient"><button class="sel" data-v="0">0°</button><button data-v="1">90°</button><button data-v="2">180°</button><button data-v="3">270°</button></div>
   </div>
   <div class="card">
     <div class="row"><div>Geluid<small>Piepjes bij 3-2-1 en faseswitch</small></div><label class="sw-t"><input type="checkbox" id="optSound" checked><span></span></label></div>
     <div class="row"><div>Scherm aan houden<small>Tijdens de training</small></div><label class="sw-t"><input type="checkbox" id="optWake" checked><span></span></label></div>
-  </div>
-  <div class="card">
     <div class="row"><div>Alle apparaten tonen<small>Als het bord niet in de lijst staat</small></div><label class="sw-t"><input type="checkbox" id="allDev"><span></span></label></div>
     <div class="row"><div>Veilige verzendmodus<small>Langzamer, maar betrouwbaarder</small></div><label class="sw-t"><input type="checkbox" id="safeMode"><span></span></label></div>
   </div>
