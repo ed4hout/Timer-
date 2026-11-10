@@ -200,7 +200,7 @@ input[type=text]{width:100%;font:600 18px Inter,sans-serif;text-transform:upperc
   
 </section>
 
-<p id="ver" style="text-align:center;font-size:11px;color:var(--mut);margin:4px 0 0;display:none">Versie 10-11 · 11:30</p>
+<p id="ver" style="text-align:center;font-size:11px;color:var(--mut);margin:4px 0 0;display:none">Versie 10-11 · 11:35</p>
 <nav class="tabs">
   <button class="act" data-t="timer"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>Timer</button>
   <button data-t="plan"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h7"/><circle cx="18" cy="16" r="3"/></svg>Schema</button>
@@ -553,17 +553,27 @@ function drawLED(f){const s=led.width/W,r=s*.4;lx.fillStyle='#000';lx.fillRect(0
 /* ============ Bluetooth (iPixel Color protocol) ============ */
 const CRC_T=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
 function crc32(b){let c=0xFFFFFFFF;for(let i=0;i<b.length;i++)c=CRC_T[(c^b[i])&255]^(c>>>8);return(c^0xFFFFFFFF)>>>0}
-const SVC=0x00fa,CH_W=0xfa02,CH_N=0xfa03;
+const U16=n=>'0000'+n.toString(16).padStart(4,'0')+'-0000-1000-8000-00805f9b34fb';
+const SVC=U16(0x00fa),CH_W=U16(0xfa02),CH_N=U16(0xfa03);
 let device=null,chW=null,chN=null,ackW=null;
 function setConn(on,t){$('pill').classList.toggle('on',on);$('pillTxt').textContent=t;$('ledState').textContent=on?'live':'niet verbonden'}
-const SVCS=[0x00fa,0xfa00,0xae00,0xfee7,0xffe0,0xfff0];
+const SVCS=[0x00fa,0xfa00,0xae00,0xfee7,0xffe0,0xfff0].map(U16);
 let canResp=true,canNoResp=true,connStep='';
 const errText=e=>(e&&(e.message||e.name))||String(e||'onbekend');
 async function connect(){
   if(!navigator.bluetooth){$('noBle').style.display='block';toast('Open deze pagina in Bluefy');return}
   try{
     connStep='bord kiezen';
-    device=await navigator.bluetooth.requestDevice($('allDev').checked?{acceptAllDevices:true,optionalServices:SVCS}:{filters:[{namePrefix:'LED_BLE'}],optionalServices:SVCS});
+    // Bluefy is picky about request options: try several forms, simplest last
+    const tries=[];
+    if(!$('allDev').checked)tries.push({filters:[{namePrefix:'LED_BLE'}],optionalServices:SVCS});
+    tries.push({acceptAllDevices:true,optionalServices:SVCS},{acceptAllDevices:true,optionalServices:[SVC,SVCS[1]]},{acceptAllDevices:true});
+    let lastErr=null;device=null;
+    for(const o of tries){
+      try{device=await navigator.bluetooth.requestDevice(o);break}
+      catch(e){if(e&&e.name==='NotFoundError'&&/cancel/i.test(e.message||''))throw e;lastErr=e}
+    }
+    if(!device)throw lastErr;
     device.addEventListener('gattserverdisconnected',()=>{chW=null;setConn(false,'Verbroken')});
     setConn(false,'Verbinden…');
     connStep='verbinden';
