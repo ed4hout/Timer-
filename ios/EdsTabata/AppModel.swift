@@ -12,7 +12,7 @@ final class AppModel: ObservableObject {
         didSet { Store.save("cfg", config); if oldValue != config { rebuild(); reset() } }
     }
     @Published var looks: Looks {
-        didSet { Store.save("looks", looks); lastKey = ""; refreshBoard() }
+        didSet { Store.save("looks", looks); lastKey = ""; gifSeg = -1; refreshBoard() }
     }
     @Published var favorites: [Favorite] {
         didSet { Store.save("favs", favorites) }
@@ -47,6 +47,8 @@ final class AppModel: ObservableObject {
     private var lastTick = Date()
     private var catching = false
     private var toastID = UUID()
+    private var gifSeg = -1
+    private var gifEnd: (idx: Int, rem: Int)?
     private var observers: [NSObjectProtocol] = []
 
     init() {
@@ -63,6 +65,7 @@ final class AppModel: ObservableObject {
         restoreRun()
         board.onConnect = { [weak self] in
             self?.lastKey = ""
+            self?.gifSeg = -1
             self?.refreshBoard()
         }
         observers.append(NotificationCenter.default.addObserver(
@@ -125,6 +128,7 @@ final class AppModel: ObservableObject {
         lastIdx = p.idx
         lastTick = Date()
         lastKey = ""
+        gifSeg = -1
         startTimer()
         saveRun()
         updateIdleTimer()
@@ -233,9 +237,65 @@ final class AppModel: ObservableObject {
     }
 
     private func refreshBoard(_ d: Display? = nil) {
-        let f = BoardArt.timer(d ?? display, cfg: config, looks: looks)
+        let dd = d ?? display
+        let f = BoardArt.timer(dd, cfg: config, looks: looks)
         preview = f
-        board.show(f)
+        if running {
+            // One animation per phase: the board counts the seconds itself, so it never flashes.
+            let p = position(elapsed)
+            if p.idx != gifSeg {
+                gifSeg = p.idx
+                board.play { [weak self] in self?.segmentGif() }
+            } else if let ge = gifEnd, ge.idx == p.idx, dd.remain <= Double(ge.rem) + 3 {
+                gifEnd = nil
+                board.play { [weak self] in self?.segmentGif() }
+            }
+        } else {
+            gifSeg = -1
+            gifEnd = nil
+            board.show(f)
+        }
+    }
+
+    /// Built right before sending, so it starts on the second the board will actually show it.
+    private func segmentGif() -> [UInt8]? {
+        guard running else { return nil }
+        let e = elapsed + board.uploadDelay
+        guard e < total else { return nil }
+        let p = position(e)
+        let s = segments[p.idx]
+        let rem = Double(s.dur) - p.el
+        let sec = max(1, Int(ceil(rem)))
+        let firstDelay = max(5, Int(((rem - Double(sec - 1)) * 100).rounded()))
+        let lastK = max(1, sec - 59)
+        gifEnd = lastK > 1 ? (p.idx, lastK - 1) : nil
+        var frames: [Frame] = []
+        var delays: [Int] = []
+        for k in stride(from: sec, through: lastK, by: -1) {
+            frames.append(segmentFrame(s, k))
+            delays.append(k == sec ? firstDelay : 100)
+        }
+        if gifEnd == nil {
+            if p.idx + 1 < segments.count {
+                let nx = segments[p.idx + 1]
+                for k in stride(from: nx.dur, through: max(1, nx.dur - 2), by: -1) {
+                    frames.append(segmentFrame(nx, k))
+                    delays.append(100)
+                }
+            } else {
+                let done = Display(phase: .done, idle: false, paused: false, finished: true, remain: 0, sec: 0,
+                                   frac: 0, round: config.rounds, set: config.sets, left: 0)
+                frames.append(BoardArt.timer(done, cfg: config, looks: looks))
+                delays.append(60000)
+            }
+        }
+        return BoardProtocol.gif(frames, delays: delays)
+    }
+
+    private func segmentFrame(_ s: Segment, _ k: Int) -> Frame {
+        let d = Display(phase: s.phase, idle: false, paused: false, finished: false, remain: Double(k), sec: k,
+                        frac: Double(s.dur - k) / Double(max(1, s.dur)), round: s.round, set: s.set, left: 0)
+        return BoardArt.timer(d, cfg: config, looks: looks)
     }
 
     private func updateIdleTimer() {
