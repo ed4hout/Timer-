@@ -1,0 +1,37 @@
+{
+  "name": "Ed’s Tabata",
+  "identifier": "nl.ed4hout.source",
+  "subtitle": "Tabata-timer voor het LED-bord",
+  "sourceURL": "https://ed4hout.github.io/Timer-/source.json",
+  "iconURL": "https://ed4hout.github.io/Timer-/icon.png",
+  "tintColor": "FF3B2F",
+  "apps": [
+    {
+      "name": "Ed’s Tabata",
+      "bundleIdentifier": "nl.ed4hout.edstabata",
+      "developerName": "Edwin",
+      "subtitle": "Tabata-timer met LED-bord",
+      "localizedDescription": "Tabata-timer die je Briloner LED-bord live aanstuurt, met piepjes over je muziek heen.",
+      "iconURL": "https://ed4hout.github.io/Timer-/icon.png",
+      "tintColor": "FF3B2F",
+      "versions": [
+        {
+          "version": "1.0",
+          "buildVersion": "1",
+          "date": "2026-11-10T17:04:04Z",
+          "localizedDescription": "Live bord zonder flits, piepjes over Spotify.",
+          "downloadURL": "https://github.com/ed4hout/Timer-/releases/download/app/EdsTabata.ipa",
+          "size": 449073,
+          "minOSVersion": "17.0"
+        }
+      ],
+      "appPermissions": {
+        "entitlements": [],
+        "privacy": {
+          "NSBluetoothAlwaysUsageDescription": "Ed’s Tabata gebruikt Bluetooth om je LED-bord aan te sturen."
+        }
+      }
+    }
+  ],
+  "news": []
+}

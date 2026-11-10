@@ -10,9 +10,16 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: ios-build
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: macos-15-intel
+    env:
+      APP_VERSION: "1.0.${{ github.run_number }}"
+      APP_BUILD: "${{ github.run_number }}"
     steps:
       - uses: actions/checkout@v4
 
@@ -26,8 +33,9 @@ jobs:
           xcodebuild -project EdsTabata.xcodeproj -target EdsTabata \
             -configuration Release -sdk iphoneos \
             SYMROOT="$PWD/build" \
+            MARKETING_VERSION="$APP_VERSION" CURRENT_PROJECT_VERSION="$APP_BUILD" \
             CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
-            build 2>&1 | tee build.log | grep -E "error:|warning: unre|BUILD (SUCCEEDED|FAILED)" || true
+            build 2>&1 | tee build.log | grep -E "error:|BUILD (SUCCEEDED|FAILED)" || true
           test -d build/Release-iphoneos/EdsTabata.app
 
       - name: Foutmeldingen tonen
@@ -47,5 +55,51 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release delete app -y --cleanup-tag || true
-          gh release create app ios/EdsTabata.ipa --title "Ed’s Tabata (iPhone)" \
-            --notes "Open deze pagina op je iPhone, tik op EdsTabata.ipa en kies 'Open in SideStore'."
+          gh release create app ios/EdsTabata.ipa --title "Ed’s Tabata $APP_VERSION (iPhone)" \
+            --notes "Voeg de SideStore-bron toe: https://ed4hout.github.io/Timer-/source.json"
+
+      - name: SideStore-bron bijwerken
+        run: |
+          NOTES="$(git log -1 --pretty=%s)"
+          SIZE=$(stat -f%z ios/EdsTabata.ipa)
+          NOTES="$NOTES" SIZE="$SIZE" python3 - <<'PY'
+          import json, os, datetime
+          v = os.environ["APP_VERSION"]
+          src = {
+            "name": "Ed’s Tabata",
+            "identifier": "nl.ed4hout.source",
+            "subtitle": "Tabata-timer voor het LED-bord",
+            "sourceURL": "https://ed4hout.github.io/Timer-/source.json",
+            "iconURL": "https://ed4hout.github.io/Timer-/icon.png",
+            "tintColor": "FF3B2F",
+            "apps": [{
+              "name": "Ed’s Tabata",
+              "bundleIdentifier": "nl.ed4hout.edstabata",
+              "developerName": "Edwin",
+              "subtitle": "Tabata-timer met LED-bord",
+              "localizedDescription": "Tabata-timer die je Briloner LED-bord live aanstuurt, met piepjes over je muziek heen.",
+              "iconURL": "https://ed4hout.github.io/Timer-/icon.png",
+              "tintColor": "FF3B2F",
+              "versions": [{
+                "version": v,
+                "buildVersion": os.environ["APP_BUILD"],
+                "date": datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "localizedDescription": os.environ["NOTES"],
+                "downloadURL": "https://github.com/ed4hout/Timer-/releases/download/app/EdsTabata.ipa",
+                "size": int(os.environ["SIZE"]),
+                "minOSVersion": "17.0"
+              }],
+              "appPermissions": {
+                "entitlements": [],
+                "privacy": {"NSBluetoothAlwaysUsageDescription": "Ed’s Tabata gebruikt Bluetooth om je LED-bord aan te sturen."}
+              }
+            }],
+            "news": []
+          }
+          open("source.json", "w").write(json.dumps(src, indent=2, ensure_ascii=False) + "\n")
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add source.json
+          git commit -m "SideStore-bron: versie $APP_VERSION" || exit 0
+          for i in 1 2 3; do git pull --rebase -q origin main && git push -q origin HEAD:main && break; sleep 5; done
