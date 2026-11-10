@@ -200,6 +200,7 @@ input[type=text]{width:100%;font:600 18px Inter,sans-serif;text-transform:upperc
   
 </section>
 
+<p id="ver" style="text-align:center;font-size:11px;color:var(--mut);margin:4px 0 0;display:none">Versie 10-11 · 08:40</p>
 <nav class="tabs">
   <button class="act" data-t="timer"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>Timer</button>
   <button data-t="plan"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h7"/><circle cx="18" cy="16" r="3"/></svg>Schema</button>
@@ -402,10 +403,11 @@ let snd=Object.assign({},SND_DEF,store.get('snd',{}));
 function silentWav(){const n=4000,b=new ArrayBuffer(44+n*2),v=new DataView(b);const w=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))};
   w(0,'RIFF');v.setUint32(4,36+n*2,true);w(8,'WAVE');w(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,8000,true);v.setUint32(28,16000,true);v.setUint16(32,2,true);v.setUint16(34,16,true);w(36,'data');v.setUint32(40,n*2,true);
   return URL.createObjectURL(new Blob([b],{type:'audio/wav'}))}
-const canMix=()=>'audioSession' in navigator;
+// iOS/Bluefy honours no mixing for web audio: in mix mode we start NO audio at all
+const canMix=()=>false;
 function initAudio(){
   // Mixen aan + browser kan niet mixen: géén audio starten, anders pauzeert iOS Spotify
-  if(snd.mix&&!canMix()){stopKeepAlive();return}
+  if(snd.mix){stopKeepAlive();if(actx){try{actx.close()}catch(e){}actx=null;master=null}try{speechSynthesis.cancel()}catch(e){}return}
   try{if(navigator.audioSession)navigator.audioSession.type=snd.mix?'ambient':'playback'}catch(e){}
   if(!snd.mix){try{if(!silentEl){silentEl=new Audio(silentWav());silentEl.loop=true;silentEl.setAttribute('playsinline','')}silentEl.play().catch(()=>{})}catch(e){}}else stopKeepAlive();
   try{if(!actx){actx=new (window.AudioContext||window.webkitAudioContext)();master=actx.createGain();master.connect(actx.destination)}if(actx.state!=='running')actx.resume()}catch(e){}
@@ -630,7 +632,7 @@ function renderSounds(){
 $('vol').value=snd.vol;$('volV').textContent=snd.vol+'%';
 $('vol').oninput=e=>{snd.vol=+e.target.value;$('volV').textContent=snd.vol+'%';store.set('snd',snd);if(master)master.gain.value=snd.vol/100};
 renderSounds();renderIcons();
-function mixNote(){$('mixNote').textContent=!snd.mix?'Uit: piepjes werken, Spotify pauzeert':canMix()?'Aan: Spotify + piepjes samen (stille modus uit)':'Aan: Spotify blijft spelen, piepjes uit (Bluefy kan niet mixen)';$('sounds').style.opacity=snd.mix&&!canMix()?.4:1}
+function mixNote(){$('mixNote').textContent=!snd.mix?'Uit: piepjes werken, Spotify pauzeert':canMix()?'Aan: Spotify + piepjes samen (stille modus uit)':'Aan: Spotify blijft spelen, app-geluid uit';$('sounds').style.opacity=snd.mix&&!canMix()?.4:1}
 $('optMix').checked=snd.mix;mixNote();$('optMix').onchange=e=>{snd.mix=e.target.checked;store.set('snd',snd);stopKeepAlive();initAudio();mixNote();if(!snd.mix)return toast('Piepjes aan · Spotify pauzeert bij start');if(actx){try{actx.close()}catch(e){}actx=null;master=null}toast('Spotify blijft spelen')};
 applyLook();renderLooks();$('favCancel').onclick=()=>$('saveBar').classList.remove('show');$('favName').addEventListener('keydown',e=>{if(e.key==='Enter')saveFav()});
 $('bReset').onclick=resetTimer;
@@ -644,7 +646,7 @@ $('pOn').onclick=()=>cmd(0x07,0x01,[1]);$('pOff').onclick=()=>cmd(0x07,0x01,[0])
 $('bMsg').onclick=()=>{const f=msgFrame($('msg').value||' ');drawLED(f);if(!chW)return toast('Eerst verbinden');queueBoard(f);toast('Op het bord')};
 document.querySelectorAll('#orient button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#orient button').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');cmd(0x06,0x80,[+b.dataset.v&3])});
 ['allDev','safeMode','optWake'].forEach(id=>{const el=$(id);el.checked=store.get(id,el.checked);el.onchange=()=>store.set(id,el.checked)});
-function showTab(t){document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('act',x.dataset.t===t));document.querySelectorAll('.view').forEach(v=>v.classList.toggle('act',v.id==='v-'+t));if(t==='plan')renderPlan()}
+function showTab(t){$('ver').style.display=t==='board'?'block':'none';document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('act',x.dataset.t===t));document.querySelectorAll('.view').forEach(v=>v.classList.toggle('act',v.id==='v-'+t));if(t==='plan')renderPlan()}
 document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>showTab(b.dataset.t));
 if(!navigator.bluetooth)$('noBle').style.display='block';
 renderPlan();
