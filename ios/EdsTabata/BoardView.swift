@@ -38,6 +38,14 @@ struct BoardView: View {
                             if !editing { board.setBrightness(Int(model.brightness)) }
                         })
                         .tint(.white)
+                        HStack {
+                            SectionLabel(text: "Bord gelijkzetten")
+                            Text(String(format: "+%.1f s", model.boardCorrection)).font(.system(size: 12, weight: .semibold))
+                        }
+                        .padding(.top, 4)
+                        Slider(value: $model.boardCorrection, in: 0...6, step: 0.5).tint(.white)
+                        Text("Loopt het bord achter? Schuif naar rechts. Loopt het voor? Naar links. Werkt vanaf de volgende fase.")
+                            .font(.system(size: 11)).foregroundColor(Theme.muted)
                     }
 
                     // Sport pictures

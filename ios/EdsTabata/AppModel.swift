@@ -26,6 +26,10 @@ final class AppModel: ObservableObject {
     @Published var brightness: Double {
         didSet { UserDefaults.standard.set(brightness, forKey: "bright") }
     }
+    /// Seconds the board animation is started ahead, to make up for Bluetooth/board delay.
+    @Published var boardCorrection: Double {
+        didSet { UserDefaults.standard.set(boardCorrection, forKey: "corr") }
+    }
     @Published var message = "LETS GO!"
     @Published var rotation = 0
     @Published var toast: String?
@@ -58,6 +62,7 @@ final class AppModel: ObservableObject {
         soundSettings = Store.load("snd", SoundSettings())
         keepAwake = UserDefaults.standard.object(forKey: "awake") as? Bool ?? true
         brightness = UserDefaults.standard.object(forKey: "bright") as? Double ?? 70
+        boardCorrection = UserDefaults.standard.object(forKey: "corr") as? Double ?? 1.5
 
         sound.settings = soundSettings
         board.brightness = Int(brightness)
@@ -260,7 +265,7 @@ final class AppModel: ObservableObject {
     /// Built right before sending, so it starts on the second the board will actually show it.
     private func segmentGif() -> [UInt8]? {
         guard running else { return nil }
-        let e = elapsed + board.uploadDelay
+        let e = elapsed + board.uploadDelay + boardCorrection
         guard e < total else { return nil }
         let p = position(e)
         let s = segments[p.idx]
