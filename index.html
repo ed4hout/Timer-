@@ -195,12 +195,13 @@ input[type=text]{width:100%;font:600 18px Inter,sans-serif;text-transform:upperc
   <div class="card">
     <div class="row"><div>Scherm aan houden<small>Tijdens de training</small></div><label class="sw-t"><input type="checkbox" id="optWake" checked><span></span></label></div>
     <div class="row"><div>Alle apparaten tonen<small>Als het bord niet in de lijst staat</small></div><label class="sw-t"><input type="checkbox" id="allDev"><span></span></label></div>
+    <div class="row"><div>Training vooraf naar bord<small>Bord telt zelf door als je Bluefy sluit (kan traag zijn)</small></div><label class="sw-t"><input type="checkbox" id="preUpload"><span></span></label></div>
     <div class="row"><div>Veilige verzendmodus<small>Langzamer, maar betrouwbaarder</small></div><label class="sw-t"><input type="checkbox" id="safeMode"><span></span></label></div>
   </div>
   
 </section>
 
-<p id="ver" style="text-align:center;font-size:11px;color:var(--mut);margin:4px 0 0;display:none">Versie 10-11 · 11:35</p>
+<p id="ver" style="text-align:center;font-size:11px;color:var(--mut);margin:4px 0 0;display:none">Versie 10-11 · 11:45</p>
 <nav class="tabs">
   <button class="act" data-t="timer"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>Timer</button>
   <button data-t="plan"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h7"/><circle cx="18" cy="16" r="3"/></svg>Schema</button>
@@ -319,7 +320,7 @@ async function start(){
   const p=pos(pausedE),sg=segs[p.idx],rem=Math.max(1,Math.ceil(sg.dur-p.el-1e-6));
   pausedE=cum[p.idx]+sg.dur-rem; // snap to whole seconds
   boardMode=false;
-  if(chW){boardMode=await uploadWorkout(pausedE)}
+  if(chW&&$('preUpload').checked){boardMode=await uploadWorkout(pausedE)}
   t0=Date.now()-pausedE*1000;running=true;setPlayIcon(true);requestWake();saveRun();
   if(pausedE===0)phaseCue(segs[0].type);
   lastIdx=pos(pausedE).idx;lastTick=Date.now();lastKey='';
@@ -598,6 +599,7 @@ async function connect(){
   }
 }
 const waitAck=ms=>new Promise(res=>{const fn=s=>{clearTimeout(t);res(s)};const t=setTimeout(()=>{if(ackW===fn)ackW=null;res(-1)},ms);ackW=fn});
+const wrT=(b,r)=>Promise.race([wr(b,r),sleep(3000).then(()=>{throw new Error('schrijven duurt te lang')})]);
 async function wr(b,resp){
   const noResp=chW.writeValueWithoutResponse&&canNoResp&&(!resp||!canResp);
   if(noResp)return chW.writeValueWithoutResponse(b);
@@ -607,6 +609,7 @@ async function wr(b,resp){
 async function cmd(c,t,p=[]){if(!chW)return;const n=4+p.length;await wr(new Uint8Array([n&255,n>>8,c,t,...p]),true)}
 // generic iPixel media upload: PNG (still) or GIF (animation), 12 KB windows, ack per window
 async function sendMedia(data,isGif,onPct){
+  const t0s=Date.now();
   const WIN=12*1024,size=data.length,crc=crc32(data),safe=$('safeMode').checked,CH=safe?120:180;
   const le=v=>[v&255,(v>>>8)&255,(v>>>16)&255,(v>>>24)&255];
   let sent=0;
@@ -615,7 +618,7 @@ async function sendMedia(data,isGif,onPct){
     const head=[isGif?3:2,0,off===0?0:2,...le(size),...le(crc),isGif?2:0,0],tot=head.length+win.length+2;
     const buf=new Uint8Array(tot);buf[0]=tot&255;buf[1]=(tot>>8)&255;buf.set(head,2);buf.set(win,2+head.length);
     const ack=chN?waitAck(isGif?8000:1500):null;let n=0;
-    for(let i=0;i<buf.length;i+=CH){n++;await wr(buf.subarray(i,i+CH),safe||i+CH>=buf.length||n%8===0);sent+=Math.min(CH,buf.length-i);onPct&&onPct(Math.min(99,Math.round(sent/(size+15)*100)))}
+    for(let i=0;i<buf.length;i+=CH){n++;if(Date.now()-t0s>(isGif?30000:6000))throw new Error('bord reageert niet');if(n%4===0)await sleep(isGif?25:8);await wrT(buf.subarray(i,i+CH),safe||i+CH>=buf.length||n%8===0);sent+=Math.min(CH,buf.length-i);onPct&&onPct(Math.min(99,Math.round(sent/(size+15)*100)))}
     if(ack){const s=await ack;if(s===3)break}else await sleep(isGif?200:80);
   }
   onPct&&onPct(100);
@@ -674,7 +677,7 @@ $('bright').oninput=e=>{$('brV').textContent=e.target.value+'%';store.set('brigh
 $('pOn').onclick=()=>cmd(0x07,0x01,[1]);$('pOff').onclick=()=>cmd(0x07,0x01,[0]);
 $('bMsg').onclick=()=>{const f=msgFrame($('msg').value||' ');drawLED(f);if(!chW)return toast('Eerst verbinden');queueBoard(f);toast('Op het bord')};
 document.querySelectorAll('#orient button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#orient button').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');cmd(0x06,0x80,[+b.dataset.v&3])});
-['allDev','safeMode','optWake'].forEach(id=>{const el=$(id);el.checked=store.get(id,el.checked);el.onchange=()=>store.set(id,el.checked)});
+['allDev','safeMode','optWake','preUpload'].forEach(id=>{const el=$(id);el.checked=store.get(id,el.checked);el.onchange=()=>store.set(id,el.checked)});
 function showTab(t){$('ver').style.display=t==='board'?'block':'none';document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('act',x.dataset.t===t));document.querySelectorAll('.view').forEach(v=>v.classList.toggle('act',v.id==='v-'+t));if(t==='plan')renderPlan()}
 document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>showTab(b.dataset.t));
 if(!navigator.bluetooth)$('noBle').style.display='block';
