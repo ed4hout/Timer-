@@ -16,12 +16,12 @@
       "tintColor": "FF3B2F",
       "versions": [
         {
-          "version": "1.0",
-          "buildVersion": "1",
-          "date": "2026-11-10T17:04:04Z",
-          "localizedDescription": "Live bord zonder flits, piepjes over Spotify.",
+          "version": "1.0.10",
+          "buildVersion": "10",
+          "date": "2026-11-10T17:34:34Z",
+          "localizedDescription": "SideStore-bron (source.json) + automatische versienummers",
           "downloadURL": "https://github.com/ed4hout/Timer-/releases/download/app/EdsTabata.ipa",
-          "size": 449073,
+          "size": 449075,
           "minOSVersion": "17.0"
         }
       ],
