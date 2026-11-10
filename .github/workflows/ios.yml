@@ -1,0 +1,51 @@
+name: iPhone-app bouwen
+
+on:
+  push:
+    paths:
+      - "ios/**"
+      - ".github/workflows/ios.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Xcode-versie
+        run: xcodebuild -version
+
+      - name: Bouwen (zonder ondertekening, SideStore tekent zelf)
+        working-directory: ios
+        run: |
+          set -o pipefail
+          xcodebuild -project EdsTabata.xcodeproj -target EdsTabata \
+            -configuration Release -sdk iphoneos \
+            SYMROOT="$PWD/build" \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
+            build 2>&1 | tee build.log | grep -E "error:|warning: unre|BUILD (SUCCEEDED|FAILED)" || true
+          test -d build/Release-iphoneos/EdsTabata.app
+
+      - name: Foutmeldingen tonen
+        if: failure()
+        working-directory: ios
+        run: grep -E "error:" build.log | head -50 || true
+
+      - name: .ipa maken
+        working-directory: ios
+        run: |
+          mkdir -p Payload
+          cp -R build/Release-iphoneos/EdsTabata.app Payload/
+          zip -qry EdsTabata.ipa Payload
+
+      - name: Publiceren als release "app"
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete app -y --cleanup-tag || true
+          gh release create app ios/EdsTabata.ipa --title "Ed’s Tabata (iPhone)" \
+            --notes "Open deze pagina op je iPhone, tik op EdsTabata.ipa en kies 'Open in SideStore'."
