@@ -166,6 +166,16 @@ final class Board: NSObject, ObservableObject {
     // Serial send queue: commands first, then the newest picture (older pictures are skipped).
     private enum Media { case still(Frame), animation(() -> [UInt8]?) }
     private var commands: [[UInt8]] = []
+    private var commandGap: [Double] = []
+    private var currentGap: Double = 0.05
+
+    // Live DIY mode (as the iPixel app draws live): only changed pixels, grouped per colour.
+    private var diyOn = false
+    private var screen = [UInt8](repeating: 0, count: Frame.w * Frame.h * 3)
+    private var healRow = 0
+    private var pendingLive: Frame?
+    private var lastSendAt = Date()
+    private var keepAliveTimer: Timer?
     private var pendingMedia: Media?
     private var windows: [[UInt8]] = []
     private var mediaStart = Date()
@@ -217,6 +227,13 @@ final class Board: NSObject, ObservableObject {
         if central.state == .poweredOn { scan() }
     }
 
+    /// Live: send only the pixels that changed since the last update (no flash, no delay).
+    func showLive(_ f: Frame) {
+        guard isConnected else { return }
+        pendingLive = f
+        pump()
+    }
+
     func show(_ f: Frame) {
         guard isConnected else { return }
         pendingMedia = .still(f)
@@ -262,6 +279,7 @@ final class Board: NSObject, ObservableObject {
     private func send(_ bytes: [UInt8]) {
         guard isConnected else { return }
         commands.append(bytes)
+        commandGap.append(0.05)
         pump()
     }
 
@@ -276,7 +294,15 @@ final class Board: NSObject, ObservableObject {
             more = !windows.isEmpty
         } else if !commands.isEmpty {
             bytes = commands.removeFirst()
+            currentGap = commandGap.isEmpty ? 0.05 : commandGap.removeFirst()
+        } else if let f = pendingLive {
+            pendingLive = nil
+            enqueueLive(f, maxLen: max(20, min(p.maximumWriteValueLength(for: writeType), 244)))
+            guard !commands.isEmpty else { return }
+            bytes = commands.removeFirst()
+            currentGap = commandGap.isEmpty ? 0.05 : commandGap.removeFirst()
         } else if let m = pendingMedia {
+            diyOn = false
             pendingMedia = nil
             ackAt = nil
             var packets: [[UInt8]]
@@ -329,7 +355,8 @@ final class Board: NSObject, ObservableObject {
         finishing = true
         jobToken += 1
         let token = jobToken
-        let wait: Double = awaitingAck ? ackWait : 0.05
+        let wait: Double = awaitingAck ? ackWait : currentGap
+        lastSendAt = Date()
         DispatchQueue.main.asyncAfter(deadline: .now() + wait) { [weak self] in
             guard let self, token == self.jobToken else { return }
             self.jobDone()
@@ -350,13 +377,72 @@ final class Board: NSObject, ObservableObject {
         pump()
     }
 
+    private func enqueueLive(_ f: Frame, maxLen: Int) {
+        if !diyOn {
+            commands.append([5, 0, 4, 1, 1]) // enter live drawing, clear
+            commandGap.append(0.12)
+            screen = [UInt8](repeating: 0, count: screen.count)
+            diyOn = true
+        }
+        // self-healing: repaint two full rows each update, so a lost pixel is fixed within seconds
+        for r in [healRow, healRow + 1] {
+            for x in 0..<Frame.w {
+                let j = (r * Frame.w + x) * 3
+                screen[j] = 1; screen[j + 1] = 2; screen[j + 2] = 3
+            }
+        }
+        healRow = (healRow + 2) % Frame.h
+        var groups: [UInt32: [UInt8]] = [:]
+        var order: [UInt32] = []
+        for y in 0..<Frame.h {
+            for x in 0..<Frame.w {
+                let c = f.color(x, y)
+                let j = (y * Frame.w + x) * 3
+                if screen[j] == c.0 && screen[j + 1] == c.1 && screen[j + 2] == c.2 { continue }
+                screen[j] = c.0; screen[j + 1] = c.1; screen[j + 2] = c.2
+                let k = (UInt32(c.0) << 16) | (UInt32(c.1) << 8) | UInt32(c.2)
+                if groups[k] == nil { groups[k] = []; order.append(k) }
+                groups[k]!.append(UInt8(x))
+                groups[k]!.append(UInt8(y))
+            }
+        }
+        let maxPx = min(120, (maxLen - 8) / 2)
+        for k in order {
+            let pts = groups[k]!
+            var o = 0
+            while o < pts.count {
+                let part = Array(pts[o..<min(pts.count, o + maxPx * 2)])
+                let head: [UInt8] = [UInt8(8 + part.count), 0, 5, 1, 0,
+                                     UInt8((k >> 16) & 0xFF), UInt8((k >> 8) & 0xFF), UInt8(k & 0xFF)]
+                commands.append(head + part)
+                commandGap.append(0.018)
+                o += maxPx * 2
+            }
+        }
+    }
+
+    private func startKeepAlive() {
+        keepAliveTimer?.invalidate()
+        let t = Timer(timeInterval: 4, repeats: true) { [weak self] _ in
+            guard let self, self.isConnected, self.diyOn, !self.busy,
+                  Date().timeIntervalSince(self.lastSendAt) > 8 else { return }
+            self.commands.append([5, 0, 4, 1, 3]) // stay in live mode, keep picture
+            self.commandGap.append(0.05)
+            self.pump()
+        }
+        RunLoop.main.add(t, forMode: .common)
+        keepAliveTimer = t
+    }
+
     private func resetQueue() {
         busy = false
         finishing = false
         awaitingAck = false
         chunks = []
         commands = []
+        commandGap = []
         windows = []
+        diyOn = false
         jobToken += 1
     }
 }
@@ -428,6 +514,7 @@ extension Board: CBPeripheralDelegate {
             syncTime()
             setPower(true)
             setBrightness(brightness)
+            startKeepAlive()
             onConnect?()
         }
     }

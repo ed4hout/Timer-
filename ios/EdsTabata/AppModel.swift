@@ -246,24 +246,9 @@ final class AppModel: ObservableObject {
     }
 
     private func refreshBoard(_ d: Display? = nil) {
-        let dd = d ?? display
-        let f = BoardArt.timer(dd, cfg: config, looks: looks)
+        let f = BoardArt.timer(d ?? display, cfg: config, looks: looks)
         preview = f
-        if running {
-            // One animation per phase: the board counts the seconds itself, so it never flashes.
-            let p = position(elapsed)
-            if p.idx > gifSeg {
-                gifSeg = p.idx
-                board.play { [weak self] in self?.segmentGif() }
-            } else if let ge = gifEnd, ge.idx == p.idx, dd.remain <= Double(ge.rem) + 3 {
-                gifEnd = nil
-                board.play { [weak self] in self?.segmentGif() }
-            }
-        } else {
-            gifSeg = -1
-            gifEnd = nil
-            board.show(f)
-        }
+        board.showLive(f) // only the changed pixels: board and phone change at the same moment
     }
 
     /// Built right before sending, so it starts on the second the board will actually show it.

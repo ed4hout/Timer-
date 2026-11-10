@@ -127,7 +127,7 @@ enum BoardArt {
         let bw = max(0, leftW - 1)
         let fill = Int((Double(bw) * d.frac).rounded())
         for x in 0..<bw {
-            for yy in 14..<16 { f.set(x, yy, x < fill ? col : dim(col, 0.18)) }
+            for yy in 14..<16 { f.set(x, yy, x < fill ? col : dim(col, 0.05)) }
         }
         return f
     }
