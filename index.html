@@ -174,9 +174,9 @@ input[type=text]{width:100%;font:600 18px Inter,sans-serif;text-transform:upperc
     <div style="display:flex;gap:8px;margin-top:8px"><button class="btn" id="pOn">Bord aan</button><button class="btn" id="pOff" style="margin-top:0">Bord uit</button></div>
     <p class="lbl" style="margin:12px 0 0">Helderheid <span id="brV" style="color:var(--txt)">70%</span></p>
     <input type="range" id="bright" min="5" max="100" value="70">
-    <p class="lbl" style="margin:12px 0 0">Bord gelijkzetten <span id="corrV" style="color:var(--txt)">+1.5 s</span></p>
-    <input type="range" id="corr" min="0" max="6" step="0.5" value="1.5">
-    <p style="font-size:11px;color:var(--mut);margin:2px 0 0">Loopt het bord achter? Schuif naar rechts. Loopt het voor? Naar links. Werkt vanaf de volgende fase.</p>
+    <p class="lbl" style="margin:12px 0 0">Fijnafstelling bord <span id="corrV" style="color:var(--txt)">0 s</span></p>
+    <input type="range" id="corr" min="-2" max="2" step="0.25" value="0">
+    <p style="font-size:11px;color:var(--mut);margin:2px 0 0">De app volgt het bord automatisch. Alleen als het nog steeds iets afwijkt: bord achter → rechts, bord voor → links.</p>
   </div>
   <div class="card pad">
     <p class="lbl">Sportplaatjes · tik om te tonen</p>
@@ -204,7 +204,7 @@ input[type=text]{width:100%;font:600 18px Inter,sans-serif;text-transform:upperc
   
 </section>
 
-<p id="ver" style="text-align:center;font-size:11px;color:var(--mut);margin:4px 0 0;display:none">Versie 10-11 · 16:55</p>
+<p id="ver" style="text-align:center;font-size:11px;color:var(--mut);margin:4px 0 0;display:none">Versie 10-11 · 17:05</p>
 <nav class="tabs">
   <button class="act" data-t="timer"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>Timer</button>
   <button data-t="plan"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h7"/><circle cx="18" cy="16" r="3"/></svg>Schema</button>
@@ -345,14 +345,14 @@ function finish(silent){
 function loop(){
   const now=Date.now();catching=now-lastTick>1500;lastTick=now;
   const e=E();if(e>=total){finish(catching);return}
-  const p=pos(e);if(p.idx!==lastIdx){if(!catching)phaseCue(segs[p.idx].type);lastIdx=p.idx}
+  const p=pos(e);if(p.idx>lastIdx){if(!catching)phaseCue(segs[p.idx].type);lastIdx=p.idx}
   render();raf=setTimeout(loop,100);
 }
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&running){lastTick=0;requestWake()}});
 
 const RING=854.5;const _ui={};
 function ui(id,prop,v){const k=id+prop;if(_ui[k]===v)return;_ui[k]=v;const el=$(id);if(prop==='t')el.textContent=v;else el.style[prop]=v}
-let _phaseCss='';
+let _phaseCss='',beeped='';
 function render(){
   const e=E(),finished=e>=total&&total>0,p=pos(e),seg=segs[p.idx];
   const type=finished?'done':seg.type,remain=finished?0:Math.max(0,seg.dur-p.el),frac=finished?0:1-remain/seg.dur;
@@ -375,11 +375,11 @@ function render(){
   ui('ledState','t',!chW?'niet verbonden':(running&&boardMode?'loopt zelfstandig':'live'));
   const key=finished?'done':p.idx+':'+sec+':'+(running?1:0);
   if(key!==lastKey){
-    if(running&&!catching&&sec<=3&&sec>=1)beepCount(sec);
+    if(running&&!catching&&sec<=3&&sec>=1&&beeped!==p.idx+':'+sec){beeped=p.idx+':'+sec;beepCount(sec)}
     lastKey=key;
     const f=boardFrame(idle?'idle':type,sec,frac,seg||{round:0,set:1},!running&&!finished&&!idle);
     drawLED(f);
-    if(running&&!boardMode){if(p.idx!==gifSeg){gifSeg=p.idx;queueGif(segmentGif)}else if(gifEnd&&gifEnd.idx===p.idx&&remain<=gifEnd.rem+3){gifEnd=null;queueGif(segmentGif)}}
+    if(running&&!boardMode){if(p.idx>gifSeg){gifSeg=p.idx;queueGif(segmentGif)}else if(gifEnd&&gifEnd.idx===p.idx&&remain<=gifEnd.rem+3){gifEnd=null;queueGif(segmentGif)}}
     else if(!(running&&boardMode)){gifSeg=-1;gifEnd=null;queueBoard(f)}
   }
 }
@@ -595,7 +595,7 @@ async function connect(){
     chW=await svc.getCharacteristic(CH_W);
     const pr=chW.properties||{};canResp=pr.write!==false;canNoResp=pr.writeWithoutResponse!==false;
     if(!canResp&&!canNoResp){canResp=canNoResp=true}
-    try{chN=await svc.getCharacteristic(CH_N);await chN.startNotifications();chN.addEventListener('characteristicvaluechanged',e=>{const v=new Uint8Array(e.target.value.buffer);if(v.length>=5&&v[0]===5&&v[1]===0&&ackW){const w=ackW;ackW=null;w(v[4])}})}catch(e){chN=null}
+    try{chN=await svc.getCharacteristic(CH_N);await chN.startNotifications();chN.addEventListener('characteristicvaluechanged',e=>{const v=new Uint8Array(e.target.value.buffer);if(v.length>=5&&v[0]===5&&v[1]===0&&ackW){lastAckAt=Date.now();const w=ackW;ackW=null;w(v[4])}})}catch(e){chN=null}
     setConn(true,'Verbonden');toast('LED-bord verbonden ✅');
     try{await cmd(0x07,0x01,[1]);await cmd(0x04,0x80,[+$('bright').value])}catch(e){console.warn(e)}
     lastKey='';render();
@@ -617,7 +617,7 @@ async function cmd(c,t,p=[]){if(!chW)return;const n=4+p.length;await wr(new Uint
 // generic iPixel media upload: PNG (still) or GIF (animation), 12 KB windows, ack per window
 // Careful sending: never stop halfway through a packet (that leaves the board waiting = frozen),
 // pace the writes so Bluefy/iOS never drops one, and resend once if the board did not confirm.
-let ackSeen=false,sendFails=0;
+let ackSeen=false,sendFails=0,lastAckAt=0,gifStartE=0;
 async function sendMedia(data,isGif,onPct,retry=true){
   const WIN=12*1024,size=data.length,crc=crc32(data),safe=$('safeMode').checked,CH=safe?100:160,GAP=safe?30:12;
   const le=v=>[v&255,(v>>>8)&255,(v>>>16)&255,(v>>>24)&255];
@@ -626,7 +626,7 @@ async function sendMedia(data,isGif,onPct,retry=true){
     const win=data.subarray(off,Math.min(size,off+WIN));
     const head=[isGif?3:2,0,off===0?0:2,...le(size),...le(crc),isGif?2:0,0],tot=head.length+win.length+2;
     const buf=new Uint8Array(tot);buf[0]=tot&255;buf[1]=(tot>>8)&255;buf.set(head,2);buf.set(win,2+head.length);
-    const ack=chN?waitAck(off+WIN<size?8000:2500):null;
+    const ack=chN?waitAck(off+WIN<size?8000:(isGif?6000:2500)):null;
     for(let i=0;i<buf.length;i+=CH){
       if(!chW)return;
       const last=i+CH>=buf.length;
@@ -648,15 +648,22 @@ function queueBoard(f){if(!chW)return;pending={png:f};if(!sending)pump()}
 function queueGif(build){if(!chW)return;pending={gif:build};if(!sending)pump()}
 async function pump(){sending=true;while(pending&&chW){const it=pending;pending=null;try{
   if(it.png)await sendPNG(await toPNG(it.png));
-  else{const t=Date.now();const data=it.gif();if(data){await sendMedia(data,true);avgUp=avgUp*0.5+(Date.now()-t)*0.5}}
+  else{const t=Date.now();lastAckAt=0;const data=it.gif();if(data){const eb=gifStartE;await sendMedia(data,true);const ta=lastAckAt||Date.now();avgUp=Math.min(4000,avgUp*0.5+(ta-t)*0.5);syncToBoard(eb,ta)}}
 }catch(e){console.warn(e);await sleep(200)}}sending=false}
 /* One small animation per phase: the board plays the seconds itself (no flash every second).
    Built at send time so it starts at the right second; includes the first seconds of the next phase as buffer. */
 const boardCorr=()=>+($('corr')?$('corr').value:0)||0;
+/* The phone follows the board: when the board confirms the animation, we know exactly which
+   second it shows, so the phone timer (and its beeps) shift to match — whatever the Bluetooth speed. */
+function syncToBoard(eb,ta){
+  if(!running)return;
+  const err=(ta-t0)/1000-(eb-boardCorr());
+  if(Math.abs(err)>0.2&&Math.abs(err)<10){t0+=err*1000;saveRun()}
+}
 let gifSeg=-1,gifEnd=null;const GIF_MAX=60;
 function segmentGif(){
   if(!running)return null;
-  const e=E()+avgUp/1000+boardCorr(),p=pos(e);if(p.done)return null;
+  const e=E()+avgUp/1000,p=pos(e);if(p.done)return null;gifStartE=e;
   const frames=[],delays=[];
   const s=segs[p.idx],rem=s.dur-p.el;let sec=Math.max(1,Math.ceil(rem));
   const firstDelay=Math.max(5,Math.round((rem-(sec-1))*100));
@@ -703,7 +710,7 @@ $('vol').value=snd.vol;$('volV').textContent=snd.vol+'%';
 $('vol').oninput=e=>{snd.vol=+e.target.value;$('volV').textContent=snd.vol+'%';store.set('snd',snd);if(master)master.gain.value=snd.vol/100};
 renderSounds();renderIcons();
 function mixNote(){$('mixNote').textContent=!snd.mix?'Uit: piepjes werken, Spotify pauzeert':canMix()?'Aan: Spotify + piepjes samen (stille modus uit)':'Aan: Spotify blijft spelen, app-geluid uit';$('sounds').style.opacity=snd.mix&&!canMix()?.4:1}
-$('corr').value=store.get('corr',1.5);$('corrV').textContent='+'+$('corr').value+' s';$('corr').oninput=e=>{$('corrV').textContent='+'+e.target.value+' s';store.set('corr',+e.target.value)};
+$('corr').value=store.get('corr2',0);$('corrV').textContent=(+$('corr').value>0?'+':'')+$('corr').value+' s';$('corr').oninput=e=>{$('corrV').textContent=(+e.target.value>0?'+':'')+e.target.value+' s';store.set('corr2',+e.target.value)};
 $('optMix').checked=snd.mix;mixNote();$('optMix').onchange=e=>{snd.mix=e.target.checked;store.set('snd',snd);stopKeepAlive();initAudio();mixNote();if(!snd.mix)return toast('Piepjes aan · Spotify pauzeert bij start');if(actx){try{actx.close()}catch(e){}actx=null;master=null}toast('Spotify blijft spelen')};
 applyLook();renderLooks();$('favCancel').onclick=()=>$('saveBar').classList.remove('show');$('favName').addEventListener('keydown',e=>{if(e.key==='Enter')saveFav()});
 $('bReset').onclick=resetTimer;

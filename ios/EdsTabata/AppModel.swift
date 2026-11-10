@@ -28,7 +28,7 @@ final class AppModel: ObservableObject {
     }
     /// Seconds the board animation is started ahead, to make up for Bluetooth/board delay.
     @Published var boardCorrection: Double {
-        didSet { UserDefaults.standard.set(boardCorrection, forKey: "corr") }
+        didSet { UserDefaults.standard.set(boardCorrection, forKey: "corr2") }
     }
     @Published var message = "LETS GO!"
     @Published var rotation = 0
@@ -52,6 +52,8 @@ final class AppModel: ObservableObject {
     private var catching = false
     private var toastID = UUID()
     private var gifSeg = -1
+    private var gifStartE: Double = 0
+    private var beeped = ""
     private var gifEnd: (idx: Int, rem: Int)?
     private var observers: [NSObjectProtocol] = []
 
@@ -62,12 +64,13 @@ final class AppModel: ObservableObject {
         soundSettings = Store.load("snd", SoundSettings())
         keepAwake = UserDefaults.standard.object(forKey: "awake") as? Bool ?? true
         brightness = UserDefaults.standard.object(forKey: "bright") as? Double ?? 70
-        boardCorrection = UserDefaults.standard.object(forKey: "corr") as? Double ?? 1.5
+        boardCorrection = UserDefaults.standard.object(forKey: "corr2") as? Double ?? 0
 
         sound.settings = soundSettings
         board.brightness = Int(brightness)
         rebuild()
         restoreRun()
+        board.onAnimationAck = { [weak self] at in self?.syncToBoard(at) }
         board.onConnect = { [weak self] in
             self?.lastKey = ""
             self?.gifSeg = -1
@@ -216,14 +219,15 @@ final class AppModel: ObservableObject {
         let e = elapsed
         if e >= total { finish(silent: catching); return }
         let p = position(e)
-        if p.idx != lastIdx {
+        if p.idx > lastIdx {
             if !catching { cue(segments[p.idx].phase) }
             lastIdx = p.idx
         }
         let d = display
         let key = "\(p.idx):\(d.sec)"
         if key != lastKey {
-            if !catching && d.sec >= 1 && d.sec <= 3 && lastKey != "" {
+            if !catching && d.sec >= 1 && d.sec <= 3 && lastKey != "" && beeped != key {
+                beeped = key
                 sound.play(soundSettings.count, .count, word: "\(d.sec)")
             }
             lastKey = key
@@ -248,7 +252,7 @@ final class AppModel: ObservableObject {
         if running {
             // One animation per phase: the board counts the seconds itself, so it never flashes.
             let p = position(elapsed)
-            if p.idx != gifSeg {
+            if p.idx > gifSeg {
                 gifSeg = p.idx
                 board.play { [weak self] in self?.segmentGif() }
             } else if let ge = gifEnd, ge.idx == p.idx, dd.remain <= Double(ge.rem) + 3 {
@@ -265,8 +269,9 @@ final class AppModel: ObservableObject {
     /// Built right before sending, so it starts on the second the board will actually show it.
     private func segmentGif() -> [UInt8]? {
         guard running else { return nil }
-        let e = elapsed + board.uploadDelay + boardCorrection
+        let e = elapsed + board.uploadDelay
         guard e < total else { return nil }
+        gifStartE = e
         let p = position(e)
         let s = segments[p.idx]
         let rem = Double(s.dur) - p.el
@@ -295,6 +300,17 @@ final class AppModel: ObservableObject {
             }
         }
         return BoardProtocol.gif(frames, delays: delays)
+    }
+
+    /// The phone follows the board: once the board confirms, we know which second it shows,
+    /// so the phone timer (and beeps) shift to match, whatever the Bluetooth speed.
+    private func syncToBoard(_ at: Date) {
+        guard running else { return }
+        let err = at.timeIntervalSince(t0) - (gifStartE - boardCorrection)
+        if abs(err) > 0.2 && abs(err) < 10 {
+            t0 = t0.addingTimeInterval(err)
+            saveRun()
+        }
     }
 
     private func segmentFrame(_ s: Segment, _ k: Int) -> Frame {

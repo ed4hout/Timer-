@@ -39,12 +39,12 @@ struct BoardView: View {
                         })
                         .tint(.white)
                         HStack {
-                            SectionLabel(text: "Bord gelijkzetten")
-                            Text(String(format: "+%.1f s", model.boardCorrection)).font(.system(size: 12, weight: .semibold))
+                            SectionLabel(text: "Fijnafstelling bord")
+                            Text(String(format: "%+.2f s", model.boardCorrection)).font(.system(size: 12, weight: .semibold))
                         }
                         .padding(.top, 4)
-                        Slider(value: $model.boardCorrection, in: 0...6, step: 0.5).tint(.white)
-                        Text("Loopt het bord achter? Schuif naar rechts. Loopt het voor? Naar links. Werkt vanaf de volgende fase.")
+                        Slider(value: $model.boardCorrection, in: -2...2, step: 0.25).tint(.white)
+                        Text("De app volgt het bord automatisch. Alleen als het nog iets afwijkt: bord achter → rechts, bord voor → links.")
                             .font(.system(size: 11)).foregroundColor(Theme.muted)
                     }
 

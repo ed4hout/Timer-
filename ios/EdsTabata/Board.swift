@@ -148,6 +148,10 @@ final class Board: NSObject, ObservableObject {
 
     var brightness = 70
     var onConnect: (() -> Void)?
+    /// Called with the moment the board confirmed an animation (it starts playing then).
+    var onAnimationAck: ((Date) -> Void)?
+    private var currentIsAnimation = false
+    private var ackAt: Date?
 
     private var central: CBCentralManager!
     private var peripheral: CBPeripheral?
@@ -274,14 +278,17 @@ final class Board: NSObject, ObservableObject {
             bytes = commands.removeFirst()
         } else if let m = pendingMedia {
             pendingMedia = nil
+            ackAt = nil
             var packets: [[UInt8]]
             switch m {
             case .still(let f):
                 mediaStart = Date()
+                currentIsAnimation = false
                 guard let png = BoardProtocol.png(f) else { return }
                 packets = BoardProtocol.mediaPackets(png, gif: false)
             case .animation(let build):
                 mediaStart = Date()
+                currentIsAnimation = true
                 guard let g = build() else { return }
                 packets = BoardProtocol.mediaPackets(g, gif: true)
             }
@@ -299,7 +306,7 @@ final class Board: NSObject, ObservableObject {
         busy = true
         finishing = false
         awaitingAck = media
-        ackWait = more ? 8 : 1.5
+        ackWait = more ? 8 : (currentIsAnimation ? 6 : 2.5)
         writeMore()
     }
 
@@ -332,8 +339,10 @@ final class Board: NSObject, ObservableObject {
     private func jobDone() {
         jobToken += 1
         if awaitingAck && windows.isEmpty {
-            let t = Date().timeIntervalSince(mediaStart)
+            let at = ackAt ?? Date()
+            let t = at.timeIntervalSince(mediaStart)
             if t < 5 { uploadDelay = uploadDelay * 0.5 + t * 0.5 }
+            if currentIsAnimation { onAnimationAck?(at) }
         }
         busy = false
         finishing = false
@@ -426,7 +435,7 @@ extension Board: CBPeripheralDelegate {
     func peripheral(_ p: CBPeripheral, didUpdateValueFor ch: CBCharacteristic, error: Error?) {
         guard let v = ch.value else { return }
         let b = [UInt8](v)
-        if b.count >= 5, b[0] == 5, b[1] == 0, awaitingAck, finishing { jobDone() }
+        if b.count >= 5, b[0] == 5, b[1] == 0, awaitingAck, finishing { ackAt = Date(); jobDone() }
     }
 
     func peripheralIsReady(toSendWriteWithoutResponse p: CBPeripheral) { writeMore() }
