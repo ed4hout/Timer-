@@ -174,9 +174,9 @@ input[type=text]{width:100%;font:600 18px Inter,sans-serif;text-transform:upperc
     <div style="display:flex;gap:8px;margin-top:8px"><button class="btn" id="pOn">Bord aan</button><button class="btn" id="pOff" style="margin-top:0">Bord uit</button></div>
     <p class="lbl" style="margin:12px 0 0">Helderheid <span id="brV" style="color:var(--txt)">70%</span></p>
     <input type="range" id="bright" min="5" max="100" value="70">
-    <p class="lbl" style="margin:12px 0 0">Fijnafstelling bord <span id="corrV" style="color:var(--txt)">0 s</span></p>
-    <input type="range" id="corr" min="-2" max="2" step="0.25" value="0">
-    <p style="font-size:11px;color:var(--mut);margin:2px 0 0">De app volgt het bord automatisch. Alleen als het nog steeds iets afwijkt: bord achter → rechts, bord voor → links.</p>
+    <p class="lbl" style="margin:12px 0 0;display:none">Fijnafstelling bord <span id="corrV" style="color:var(--txt)">0 s</span></p>
+    <input type="range" id="corr" min="-2" max="2" step="0.25" value="0" style="display:none">
+    <p style="font-size:11px;color:var(--mut);margin:2px 0 0;display:none">De app volgt het bord automatisch. Alleen als het nog steeds iets afwijkt: bord achter → rechts, bord voor → links.</p>
   </div>
   <div class="card pad">
     <p class="lbl">Sportplaatjes · tik om te tonen</p>
@@ -204,7 +204,7 @@ input[type=text]{width:100%;font:600 18px Inter,sans-serif;text-transform:upperc
   
 </section>
 
-<p id="ver" style="text-align:center;font-size:11px;color:var(--mut);margin:4px 0 0;display:none">Versie 10-11 · 17:05</p>
+<p id="ver" style="text-align:center;font-size:11px;color:var(--mut);margin:4px 0 0;display:none">Versie 10-11 · 17:20</p>
 <nav class="tabs">
   <button class="act" data-t="timer"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>Timer</button>
   <button data-t="plan"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h7"/><circle cx="18" cy="16" r="3"/></svg>Schema</button>
@@ -379,8 +379,8 @@ function render(){
     lastKey=key;
     const f=boardFrame(idle?'idle':type,sec,frac,seg||{round:0,set:1},!running&&!finished&&!idle);
     drawLED(f);
-    if(running&&!boardMode){if(p.idx>gifSeg){gifSeg=p.idx;queueGif(segmentGif)}else if(gifEnd&&gifEnd.idx===p.idx&&remain<=gifEnd.rem+3){gifEnd=null;queueGif(segmentGif)}}
-    else if(!(running&&boardMode)){gifSeg=-1;gifEnd=null;queueBoard(f)}
+    // Live: only the changed pixels go to the board (DIY mode) — same moment as the phone
+    if(!(running&&boardMode)){queueBoard(f,boardIdx===-1);boardIdx=p.idx}
   }
 }
 function setPlayIcon(p){$('playIcon').innerHTML=p?'<path d="M7 5h4v14H7zM13 5h4v14h-4z"/>':'<path d="M8 5v14l11-7z"/>'}
@@ -549,7 +549,7 @@ function renderIcons(){
     x.fillStyle='#000';x.fillRect(0,0,256,64);
     for(let yy=0;yy<H;yy++)for(let xx=0;xx<W;xx++){const i=(yy*W+xx)*4,R=f[i],G=f[i+1],B=f[i+2];x.fillStyle=(R|G|B)?`rgb(${R},${G},${B})`:'#101114';x.beginPath();x.arc(xx*4+2,yy*4+2,1.6,0,6.2832);x.fill()}
     const bt=document.createElement('button');bt.className='icon';bt.appendChild(c);
-    bt.onclick=()=>{drawLED(f);if(!chW)return toast('Eerst verbinden met het bord');if(running)return toast('Stop eerst de timer');queueBoard(f);toast(ic.w+' op het bord')};
+    bt.onclick=()=>{drawLED(f);if(!chW)return toast('Eerst verbinden met het bord');if(running)return toast('Stop eerst de timer');queueBoard(f,true);toast(ic.w+' op het bord')};
     box.appendChild(bt);
   });
 }
@@ -596,7 +596,7 @@ async function connect(){
     const pr=chW.properties||{};canResp=pr.write!==false;canNoResp=pr.writeWithoutResponse!==false;
     if(!canResp&&!canNoResp){canResp=canNoResp=true}
     try{chN=await svc.getCharacteristic(CH_N);await chN.startNotifications();chN.addEventListener('characteristicvaluechanged',e=>{const v=new Uint8Array(e.target.value.buffer);if(v.length>=5&&v[0]===5&&v[1]===0&&ackW){lastAckAt=Date.now();const w=ackW;ackW=null;w(v[4])}})}catch(e){chN=null}
-    setConn(true,'Verbonden');toast('LED-bord verbonden ✅');
+    diyOn=false;boardIdx=-1;setConn(true,'Verbonden');toast('LED-bord verbonden ✅');
     try{await cmd(0x07,0x01,[1]);await cmd(0x04,0x80,[+$('bright').value])}catch(e){console.warn(e)}
     lastKey='';render();
   }catch(e){
@@ -619,6 +619,7 @@ async function cmd(c,t,p=[]){if(!chW)return;const n=4+p.length;await wr(new Uint
 // pace the writes so Bluefy/iOS never drops one, and resend once if the board did not confirm.
 let ackSeen=false,sendFails=0,lastAckAt=0,gifStartE=0;
 async function sendMedia(data,isGif,onPct,retry=true){
+  diyOn=false;
   const WIN=12*1024,size=data.length,crc=crc32(data),safe=$('safeMode').checked,CH=safe?100:160,GAP=safe?30:12;
   const le=v=>[v&255,(v>>>8)&255,(v>>>16)&255,(v>>>24)&255];
   let sent=0,missed=false;
@@ -643,13 +644,45 @@ const sendPNG=d=>sendMedia(d,false);
 const pngCanvas=document.createElement('canvas');pngCanvas.width=W;pngCanvas.height=H;
 async function toPNG(f){pngCanvas.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(f),W,H),0,0);const bl=await new Promise(r=>pngCanvas.toBlob(r,'image/png'));return new Uint8Array(await bl.arrayBuffer())}
 // latest-frame-wins queue so the board never lags behind the timer
-let pending=null,sending=false,avgUp=400;
-function queueBoard(f){if(!chW)return;pending={png:f};if(!sending)pump()}
+let pending=null,sending=false,avgUp=400,boardIdx=-1;
+function queueBoard(f,full){if(!chW)return;pending={px:f,full:!!full||!!(pending&&pending.full)};if(!sending)pump()}
 function queueGif(build){if(!chW)return;pending={gif:build};if(!sending)pump()}
 async function pump(){sending=true;while(pending&&chW){const it=pending;pending=null;try{
-  if(it.png)await sendPNG(await toPNG(it.png));
+  if(it.px)await sendDIY(it.px,it.full);
   else{const t=Date.now();lastAckAt=0;const data=it.gif();if(data){const eb=gifStartE;await sendMedia(data,true);const ta=lastAckAt||Date.now();avgUp=Math.min(4000,avgUp*0.5+(ta-t)*0.5);syncToBoard(eb,ta)}}
 }catch(e){console.warn(e);await sleep(200)}}sending=false}
+/* ===== DIY live mode (as the iPixel app draws live; approach from iPixel-Bridge-for-Visual-Pinball):
+   enter once, then send only changed pixels, grouped per colour: [len,0,5,1,0,R,G,B,x,y,x,y…] (max 120 px) */
+let diyOn=false,lastSendAt=0;const screenBuf=new Uint8Array(W*H*3);
+async function wrPacket(bytes){
+  const safe=$('safeMode').checked,CH=safe?100:160,GAP=safe?25:8;
+  for(let i=0;i<bytes.length;i+=CH){
+    if(!chW)return;
+    try{await Promise.race([wr(bytes.subarray(i,i+CH),safe),sleep(2000)])}catch(e){console.warn(e)}
+    if(i+CH<bytes.length)await sleep(GAP);
+  }
+  lastSendAt=Date.now();
+}
+async function sendDIY(f,full){
+  if(!diyOn||full){await wrPacket(new Uint8Array([5,0,4,1,1]));await sleep(80);screenBuf.fill(0);diyOn=true}
+  const groups=new Map();
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+    const i=(y*W+x)*4,j=(y*W+x)*3,r=f[i],g=f[i+1],b=f[i+2];
+    if(screenBuf[j]===r&&screenBuf[j+1]===g&&screenBuf[j+2]===b)continue;
+    screenBuf[j]=r;screenBuf[j+1]=g;screenBuf[j+2]=b;
+    const k=(r<<16)|(g<<8)|b;if(!groups.has(k))groups.set(k,[]);groups.get(k).push(x,y);
+  }
+  for(const [k,pts] of groups){
+    for(let o=0;o<pts.length;o+=240){
+      const part=pts.slice(o,o+240),pk=new Uint8Array(8+part.length);
+      pk.set([8+part.length,0,5,1,0,(k>>16)&255,(k>>8)&255,k&255]);pk.set(part,8);
+      await wrPacket(pk);
+    }
+  }
+}
+// keep the board in live mode (it falls back to its own program when idle)
+setInterval(()=>{if(chW&&diyOn&&!sending&&Date.now()-lastSendAt>8000)wrPacket(new Uint8Array([5,0,4,1,3])).catch(()=>{})},4000);
+
 /* One small animation per phase: the board plays the seconds itself (no flash every second).
    Built at send time so it starts at the right second; includes the first seconds of the next phase as buffer. */
 const boardCorr=()=>+($('corr')?$('corr').value:0)||0;
@@ -721,7 +754,7 @@ $('bDisc').onclick=()=>{if(device&&device.gatt.connected)device.gatt.disconnect(
 let brT;$('bright').value=store.get('bright',70);$('brV').textContent=$('bright').value+'%';
 $('bright').oninput=e=>{$('brV').textContent=e.target.value+'%';store.set('bright',+e.target.value);clearTimeout(brT);brT=setTimeout(()=>cmd(0x04,0x80,[+e.target.value]),120)};
 $('pOn').onclick=()=>cmd(0x07,0x01,[1]);$('pOff').onclick=()=>cmd(0x07,0x01,[0]);
-$('bMsg').onclick=()=>{const f=msgFrame($('msg').value||' ');drawLED(f);if(!chW)return toast('Eerst verbinden');queueBoard(f);toast('Op het bord')};
+$('bMsg').onclick=()=>{const f=msgFrame($('msg').value||' ');drawLED(f);if(!chW)return toast('Eerst verbinden');queueBoard(f,true);toast('Op het bord')};
 document.querySelectorAll('#orient button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#orient button').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');cmd(0x06,0x80,[+b.dataset.v&3])});
 ['allDev','safeMode','optWake','preUpload'].forEach(id=>{const el=$(id);el.checked=store.get(id,el.checked);el.onchange=()=>store.set(id,el.checked)});
 function showTab(t){$('ver').style.display=t==='board'?'block':'none';document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('act',x.dataset.t===t));document.querySelectorAll('.view').forEach(v=>v.classList.toggle('act',v.id==='v-'+t));if(t==='plan')renderPlan()}
