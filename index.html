@@ -201,7 +201,7 @@ input[type=text]{width:100%;font:600 18px Inter,sans-serif;text-transform:upperc
   
 </section>
 
-<p id="ver" style="text-align:center;font-size:11px;color:var(--mut);margin:4px 0 0;display:none">Versie 10-11 · 11:45</p>
+<p id="ver" style="text-align:center;font-size:11px;color:var(--mut);margin:4px 0 0;display:none">Versie 10-11 · 11:55</p>
 <nav class="tabs">
   <button class="act" data-t="timer"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>Timer</button>
   <button data-t="plan"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h7"/><circle cx="18" cy="16" r="3"/></svg>Schema</button>
@@ -373,7 +373,8 @@ function render(){
     lastKey=key;
     const f=boardFrame(idle?'idle':type,sec,frac,seg||{round:0,set:1},!running&&!finished&&!idle);
     drawLED(f);
-    if(!(running&&boardMode))queueBoard(f); // in board mode the board plays the whole workout itself
+    if(running&&!boardMode){if(p.idx!==gifSeg){gifSeg=p.idx;queueGif(segmentGif)}else if(gifEnd&&gifEnd.idx===p.idx&&remain<=gifEnd.rem+3){gifEnd=null;queueGif(segmentGif)}}
+    else if(!(running&&boardMode)){gifSeg=-1;gifEnd=null;queueBoard(f)}
   }
 }
 function setPlayIcon(p){$('playIcon').innerHTML=p?'<path d="M7 5h4v14H7zM13 5h4v14h-4z"/>':'<path d="M8 5v14l11-7z"/>'}
@@ -617,7 +618,7 @@ async function sendMedia(data,isGif,onPct){
     const win=data.subarray(off,Math.min(size,off+WIN));
     const head=[isGif?3:2,0,off===0?0:2,...le(size),...le(crc),isGif?2:0,0],tot=head.length+win.length+2;
     const buf=new Uint8Array(tot);buf[0]=tot&255;buf[1]=(tot>>8)&255;buf.set(head,2);buf.set(win,2+head.length);
-    const ack=chN?waitAck(isGif?8000:1500):null;let n=0;
+    const ack=chN?waitAck(off+WIN<size?8000:1500):null;let n=0;
     for(let i=0;i<buf.length;i+=CH){n++;if(Date.now()-t0s>(isGif?30000:6000))throw new Error('bord reageert niet');if(n%4===0)await sleep(isGif?25:8);await wrT(buf.subarray(i,i+CH),safe||i+CH>=buf.length||n%8===0);sent+=Math.min(CH,buf.length-i);onPct&&onPct(Math.min(99,Math.round(sent/(size+15)*100)))}
     if(ack){const s=await ack;if(s===3)break}else await sleep(isGif?200:80);
   }
@@ -627,9 +628,30 @@ const sendPNG=d=>sendMedia(d,false);
 const pngCanvas=document.createElement('canvas');pngCanvas.width=W;pngCanvas.height=H;
 async function toPNG(f){pngCanvas.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(f),W,H),0,0);const bl=await new Promise(r=>pngCanvas.toBlob(r,'image/png'));return new Uint8Array(await bl.arrayBuffer())}
 // latest-frame-wins queue so the board never lags behind the timer
-let pending=null,sending=false;
-function queueBoard(f){if(!chW)return;pending=f;if(!sending)pump()}
-async function pump(){sending=true;while(pending&&chW){const f=pending;pending=null;try{await sendPNG(await toPNG(f))}catch(e){console.warn(e);await sleep(200)}}sending=false}
+let pending=null,sending=false,avgUp=400;
+function queueBoard(f){if(!chW)return;pending={png:f};if(!sending)pump()}
+function queueGif(build){if(!chW)return;pending={gif:build};if(!sending)pump()}
+async function pump(){sending=true;while(pending&&chW){const it=pending;pending=null;try{
+  if(it.png)await sendPNG(await toPNG(it.png));
+  else{const t=Date.now();const data=it.gif();if(data){await sendMedia(data,true);avgUp=avgUp*0.5+(Date.now()-t)*0.5}}
+}catch(e){console.warn(e);await sleep(200)}}sending=false}
+/* One small animation per phase: the board plays the seconds itself (no flash every second).
+   Built at send time so it starts at the right second; includes the first seconds of the next phase as buffer. */
+let gifSeg=-1,gifEnd=null;const GIF_MAX=60;
+function segmentGif(){
+  if(!running)return null;
+  const e=E()+avgUp/1000,p=pos(e);if(p.done)return null;
+  const frames=[],delays=[];
+  const s=segs[p.idx],rem=s.dur-p.el;let sec=Math.max(1,Math.ceil(rem));
+  const firstDelay=Math.max(5,Math.round((rem-(sec-1))*100));
+  const lastK=Math.max(1,sec-GIF_MAX+1);gifEnd=lastK>1?{idx:p.idx,rem:lastK-1}:null;
+  for(let k=sec;k>=lastK;k--){frames.push(boardFrame(s.type,k,(s.dur-k)/s.dur,s,false));delays.push(k===sec?firstDelay:100)}
+  if(gifEnd)return encodeGIF(frames,delays);
+  const nx=segs[p.idx+1];
+  if(nx){for(let k=nx.dur;k>=Math.max(1,nx.dur-2);k--){frames.push(boardFrame(nx.type,k,(nx.dur-k)/nx.dur,nx,false));delays.push(100)}}
+  else{frames.push(boardFrame('done',0,1,{},false));delays.push(60000)}
+  return encodeGIF(frames,delays);
+}
 
 /* ============ wiring ============ */
 $('bPlay').onclick=()=>running?pause():start();
