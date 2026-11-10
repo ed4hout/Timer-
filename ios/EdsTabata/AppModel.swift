@@ -283,7 +283,7 @@ final class AppModel: ObservableObject {
         if gifEnd == nil {
             if p.idx + 1 < segments.count {
                 let nx = segments[p.idx + 1]
-                for k in stride(from: nx.dur, through: max(1, nx.dur - 2), by: -1) {
+                for k in stride(from: nx.dur, through: max(1, nx.dur - 5), by: -1) {
                     frames.append(segmentFrame(nx, k))
                     delays.append(100)
                 }

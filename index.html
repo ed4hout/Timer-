@@ -204,7 +204,7 @@ input[type=text]{width:100%;font:600 18px Inter,sans-serif;text-transform:upperc
   
 </section>
 
-<p id="ver" style="text-align:center;font-size:11px;color:var(--mut);margin:4px 0 0;display:none">Versie 10-11 · 16:40</p>
+<p id="ver" style="text-align:center;font-size:11px;color:var(--mut);margin:4px 0 0;display:none">Versie 10-11 · 16:55</p>
 <nav class="tabs">
   <button class="act" data-t="timer"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>Timer</button>
   <button data-t="plan"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h7"/><circle cx="18" cy="16" r="3"/></svg>Schema</button>
@@ -615,19 +615,28 @@ async function wr(b,resp){
 }
 async function cmd(c,t,p=[]){if(!chW)return;const n=4+p.length;await wr(new Uint8Array([n&255,n>>8,c,t,...p]),true)}
 // generic iPixel media upload: PNG (still) or GIF (animation), 12 KB windows, ack per window
-async function sendMedia(data,isGif,onPct){
-  const t0s=Date.now();
-  const WIN=12*1024,size=data.length,crc=crc32(data),safe=$('safeMode').checked,CH=safe?120:180;
+// Careful sending: never stop halfway through a packet (that leaves the board waiting = frozen),
+// pace the writes so Bluefy/iOS never drops one, and resend once if the board did not confirm.
+let ackSeen=false,sendFails=0;
+async function sendMedia(data,isGif,onPct,retry=true){
+  const WIN=12*1024,size=data.length,crc=crc32(data),safe=$('safeMode').checked,CH=safe?100:160,GAP=safe?30:12;
   const le=v=>[v&255,(v>>>8)&255,(v>>>16)&255,(v>>>24)&255];
-  let sent=0;
+  let sent=0,missed=false;
   for(let off=0;off<size;off+=WIN){
     const win=data.subarray(off,Math.min(size,off+WIN));
     const head=[isGif?3:2,0,off===0?0:2,...le(size),...le(crc),isGif?2:0,0],tot=head.length+win.length+2;
     const buf=new Uint8Array(tot);buf[0]=tot&255;buf[1]=(tot>>8)&255;buf.set(head,2);buf.set(win,2+head.length);
-    const ack=chN?waitAck(off+WIN<size?8000:1500):null;let n=0;
-    for(let i=0;i<buf.length;i+=CH){n++;if(Date.now()-t0s>(isGif?30000:6000))throw new Error('bord reageert niet');if(n%4===0)await sleep(isGif?25:8);await wrT(buf.subarray(i,i+CH),safe||i+CH>=buf.length||n%8===0);sent+=Math.min(CH,buf.length-i);onPct&&onPct(Math.min(99,Math.round(sent/(size+15)*100)))}
-    if(ack){const s=await ack;if(s===3)break}else await sleep(isGif?200:80);
+    const ack=chN?waitAck(off+WIN<size?8000:2500):null;
+    for(let i=0;i<buf.length;i+=CH){
+      if(!chW)return;
+      const last=i+CH>=buf.length;
+      try{await Promise.race([wr(buf.subarray(i,i+CH),safe||last),sleep(2500)])}catch(e){console.warn(e)}
+      if(!last)await sleep(GAP);
+      sent+=Math.min(CH,buf.length-i);onPct&&onPct(Math.min(99,Math.round(sent/(size+15)*100)));
+    }
+    if(ack){const s=await ack;if(s>=0)ackSeen=true;else missed=true;if(s===3)break}else await sleep(isGif?200:100);
   }
+  if(missed&&ackSeen&&retry){sendFails++;await sleep(300);return sendMedia(data,isGif,onPct,false)}
   onPct&&onPct(100);
 }
 const sendPNG=d=>sendMedia(d,false);
@@ -655,7 +664,7 @@ function segmentGif(){
   for(let k=sec;k>=lastK;k--){frames.push(boardFrame(s.type,k,(s.dur-k)/s.dur,s,false));delays.push(k===sec?firstDelay:100)}
   if(gifEnd)return encodeGIF(frames,delays);
   const nx=segs[p.idx+1];
-  if(nx){for(let k=nx.dur;k>=Math.max(1,nx.dur-2);k--){frames.push(boardFrame(nx.type,k,(nx.dur-k)/nx.dur,nx,false));delays.push(100)}}
+  if(nx){for(let k=nx.dur;k>=Math.max(1,nx.dur-5);k--){frames.push(boardFrame(nx.type,k,(nx.dur-k)/nx.dur,nx,false));delays.push(100)}}
   else{frames.push(boardFrame('done',0,1,{},false));delays.push(60000)}
   return encodeGIF(frames,delays);
 }
