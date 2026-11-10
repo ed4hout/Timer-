@@ -200,7 +200,7 @@ input[type=text]{width:100%;font:600 18px Inter,sans-serif;text-transform:upperc
   
 </section>
 
-<p id="ver" style="text-align:center;font-size:11px;color:var(--mut);margin:4px 0 0;display:none">Versie 10-11 · 08:40</p>
+<p id="ver" style="text-align:center;font-size:11px;color:var(--mut);margin:4px 0 0;display:none">Versie 10-11 · 11:30</p>
 <nav class="tabs">
   <button class="act" data-t="timer"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>Timer</button>
   <button data-t="plan"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h7"/><circle cx="18" cy="16" r="3"/></svg>Schema</button>
@@ -556,25 +556,44 @@ function crc32(b){let c=0xFFFFFFFF;for(let i=0;i<b.length;i++)c=CRC_T[(c^b[i])&2
 const SVC=0x00fa,CH_W=0xfa02,CH_N=0xfa03;
 let device=null,chW=null,chN=null,ackW=null;
 function setConn(on,t){$('pill').classList.toggle('on',on);$('pillTxt').textContent=t;$('ledState').textContent=on?'live':'niet verbonden'}
+const SVCS=[0x00fa,0xfa00,0xae00,0xfee7,0xffe0,0xfff0];
+let canResp=true,canNoResp=true,connStep='';
+const errText=e=>(e&&(e.message||e.name))||String(e||'onbekend');
 async function connect(){
   if(!navigator.bluetooth){$('noBle').style.display='block';toast('Open deze pagina in Bluefy');return}
   try{
-    const opt=[SVC,0xfa00,0xae00,0xfee7];
-    device=await navigator.bluetooth.requestDevice($('allDev').checked?{acceptAllDevices:true,optionalServices:opt}:{filters:[{namePrefix:'LED_BLE'},{services:[SVC]}],optionalServices:opt});
+    connStep='bord kiezen';
+    device=await navigator.bluetooth.requestDevice($('allDev').checked?{acceptAllDevices:true,optionalServices:SVCS}:{filters:[{namePrefix:'LED_BLE'}],optionalServices:SVCS});
     device.addEventListener('gattserverdisconnected',()=>{chW=null;setConn(false,'Verbroken')});
     setConn(false,'Verbinden…');
-    const srv=await device.gatt.connect();let svc;
-    try{svc=await srv.getPrimaryService(SVC)}catch(e){for(const s of await srv.getPrimaryServices()){try{await s.getCharacteristic(CH_W);svc=s;break}catch(_){}}}
-    if(!svc)throw new Error('geen iPixel-service gevonden');
+    connStep='verbinden';
+    let srv;for(let i=0;i<3;i++){try{srv=await device.gatt.connect();break}catch(e){if(i===2)throw e;await sleep(600)}}
+    connStep='service zoeken';
+    let svc=null;
+    for(const u of SVCS){try{const s=await srv.getPrimaryService(u);await s.getCharacteristic(CH_W);svc=s;break}catch(_){}}
+    if(!svc){try{for(const s of await srv.getPrimaryServices()){try{await s.getCharacteristic(CH_W);svc=s;break}catch(_){}}}catch(_){}}
+    if(!svc)throw new Error('geen iPixel-service op dit apparaat');
+    connStep='schrijfkanaal';
     chW=await svc.getCharacteristic(CH_W);
+    const pr=chW.properties||{};canResp=pr.write!==false;canNoResp=pr.writeWithoutResponse!==false;
+    if(!canResp&&!canNoResp){canResp=canNoResp=true}
     try{chN=await svc.getCharacteristic(CH_N);await chN.startNotifications();chN.addEventListener('characteristicvaluechanged',e=>{const v=new Uint8Array(e.target.value.buffer);if(v.length>=5&&v[0]===5&&v[1]===0&&ackW){const w=ackW;ackW=null;w(v[4])}})}catch(e){chN=null}
     setConn(true,'Verbonden');toast('LED-bord verbonden ✅');
-    await cmd(0x07,0x01,[1]);await cmd(0x04,0x80,[+$('bright').value]);
+    try{await cmd(0x07,0x01,[1]);await cmd(0x04,0x80,[+$('bright').value])}catch(e){console.warn(e)}
     lastKey='';render();
-  }catch(e){setConn(false,'LED-bord');if(e.name!=='NotFoundError')toast('Fout: '+e.message)}
+  }catch(e){
+    setConn(false,'LED-bord');
+    if(e&&e.name==='NotFoundError'&&connStep==='bord kiezen')return;
+    toast('Mislukt bij '+connStep+': '+errText(e));
+  }
 }
 const waitAck=ms=>new Promise(res=>{const fn=s=>{clearTimeout(t);res(s)};const t=setTimeout(()=>{if(ackW===fn)ackW=null;res(-1)},ms);ackW=fn});
-async function wr(b,resp){if(resp||!chW.writeValueWithoutResponse)return chW.writeValueWithResponse?chW.writeValueWithResponse(b):chW.writeValue(b);return chW.writeValueWithoutResponse(b)}
+async function wr(b,resp){
+  const noResp=chW.writeValueWithoutResponse&&canNoResp&&(!resp||!canResp);
+  if(noResp)return chW.writeValueWithoutResponse(b);
+  if(canResp&&chW.writeValueWithResponse)return chW.writeValueWithResponse(b);
+  return chW.writeValue(b);
+}
 async function cmd(c,t,p=[]){if(!chW)return;const n=4+p.length;await wr(new Uint8Array([n&255,n>>8,c,t,...p]),true)}
 // generic iPixel media upload: PNG (still) or GIF (animation), 12 KB windows, ack per window
 async function sendMedia(data,isGif,onPct){
