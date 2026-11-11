@@ -204,7 +204,7 @@ input[type=text]{width:100%;font:600 18px Inter,sans-serif;text-transform:upperc
   
 </section>
 
-<p id="ver" style="text-align:center;font-size:11px;color:var(--mut);margin:4px 0 0;display:none">Versie 10-11 · 17:35</p>
+<p id="ver" style="text-align:center;font-size:11px;color:var(--mut);margin:4px 0 0;display:none">Versie 11-11 · 20:45</p>
 <nav class="tabs">
   <button class="act" data-t="timer"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>Timer</button>
   <button data-t="plan"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h7"/><circle cx="18" cy="16" r="3"/></svg>Schema</button>
@@ -665,11 +665,11 @@ async function wrPacket(bytes){
 }
 let healRow=0;
 async function sendDIY(f,full){
-  const safe=$('safeMode').checked,CH=safe?100:160,GAP=safe?35:18,MAXPX=Math.floor((CH-8)/2);
+  const safe=$('safeMode').checked,CH=safe?100:160,GAP=safe?40:30,MAXPX=Math.floor((CH-8)/2);
   if(!diyOn||full){await wrPacket(new Uint8Array([5,0,4,1,1]));await sleep(120);screenBuf.fill(0);diyOn=true}
   // self-healing: every update also repaints 2 rows completely, so a lost pixel is fixed within seconds
-  for(const r of [healRow,healRow+1])for(let x=0;x<W;x++){const j=(r*W+x)*3;screenBuf[j]=1;screenBuf[j+1]=2;screenBuf[j+2]=3}
-  healRow=(healRow+2)%H;
+  for(const r of [healRow,healRow+1,healRow+2,healRow+3])for(let x=0;x<W;x++){const j=(r*W+x)*3;screenBuf[j]=1;screenBuf[j+1]=2;screenBuf[j+2]=3}
+  healRow=(healRow+4)%H;
   const groups=new Map();
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){
     const i=(y*W+x)*4,j=(y*W+x)*3,r=f[i],g=f[i+1],b=f[i+2];
@@ -682,7 +682,9 @@ async function sendDIY(f,full){
       const part=pts.slice(o,o+MAXPX*2),pk=new Uint8Array(8+part.length);
       pk.set([8+part.length,0,5,1,0,(k>>16)&255,(k>>8)&255,k&255]);pk.set(part,8);
       if(!chW)return;
-      try{await Promise.race([wr(pk,safe),sleep(2000)])}catch(e){console.warn(e)}
+      // confirmed write when the board supports it (lost packets get re-sent); otherwise fall back
+      try{await Promise.race([wr(pk,canResp),sleep(1500).then(()=>{throw new Error('geen bevestiging')})])}
+      catch(e){console.warn(e);if(canResp&&canNoResp){canResp=false;try{await wr(pk,false)}catch(_){}}}
       lastSendAt=Date.now();
       await sleep(GAP);
     }

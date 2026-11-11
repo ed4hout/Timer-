@@ -187,6 +187,7 @@ final class Board: NSObject, ObservableObject {
     private var finishing = false
     private var awaitingAck = false
     private var jobToken = 0
+    private var writeToken = 0
     private var ackWait: Double = 1.5
 
     private var savedID: UUID? {
@@ -297,7 +298,7 @@ final class Board: NSObject, ObservableObject {
             currentGap = commandGap.isEmpty ? 0.05 : commandGap.removeFirst()
         } else if let f = pendingLive {
             pendingLive = nil
-            enqueueLive(f, maxLen: max(20, min(p.maximumWriteValueLength(for: writeType), 244)))
+            enqueueLive(f, maxLen: max(20, min(p.maximumWriteValueLength(for: .withoutResponse), 244)))
             guard !commands.isEmpty else { return }
             bytes = commands.removeFirst()
             currentGap = commandGap.isEmpty ? 0.05 : commandGap.removeFirst()
@@ -326,7 +327,7 @@ final class Board: NSObject, ObservableObject {
         } else {
             return
         }
-        let maxLen = max(20, min(p.maximumWriteValueLength(for: writeType), 244))
+        let maxLen = max(20, min(p.maximumWriteValueLength(for: .withoutResponse), 244))
         chunks = stride(from: 0, to: bytes.count, by: maxLen).map { Data(bytes[$0..<min($0 + maxLen, bytes.count)]) }
         chunkIdx = 0
         busy = true
@@ -342,6 +343,15 @@ final class Board: NSObject, ObservableObject {
         if writeType == .withResponse {
             p.writeValue(chunks[chunkIdx], for: ch, type: .withResponse)
             chunkIdx += 1
+            writeToken += 1
+            let token = writeToken
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+                guard let self, token == self.writeToken, self.writeType == .withResponse else { return }
+                // board never confirmed: switch to unconfirmed writes and resend this piece
+                self.writeType = .withoutResponse
+                self.chunkIdx = max(0, self.chunkIdx - 1)
+                self.writeMore()
+            }
             return
         }
         while chunkIdx < chunks.count && p.canSendWriteWithoutResponse {
@@ -385,13 +395,13 @@ final class Board: NSObject, ObservableObject {
             diyOn = true
         }
         // self-healing: repaint two full rows each update, so a lost pixel is fixed within seconds
-        for r in [healRow, healRow + 1] {
+        for r in [healRow, healRow + 1, healRow + 2, healRow + 3] {
             for x in 0..<Frame.w {
                 let j = (r * Frame.w + x) * 3
                 screen[j] = 1; screen[j + 1] = 2; screen[j + 2] = 3
             }
         }
-        healRow = (healRow + 2) % Frame.h
+        healRow = (healRow + 4) % Frame.h
         var groups: [UInt32: [UInt8]] = [:]
         var order: [UInt32] = []
         for y in 0..<Frame.h {
@@ -415,7 +425,7 @@ final class Board: NSObject, ObservableObject {
                 let head: [UInt8] = [UInt8(8 + part.count), 0, 5, 1, 0,
                                      UInt8((k >> 16) & 0xFF), UInt8((k >> 8) & 0xFF), UInt8(k & 0xFF)]
                 commands.append(head + part)
-                commandGap.append(0.018)
+                commandGap.append(0.03)
                 o += maxPx * 2
             }
         }
@@ -500,7 +510,8 @@ extension Board: CBPeripheralDelegate {
         for ch in s.characteristics ?? [] {
             if ch.uuid == writeUUID {
                 writeChar = ch
-                writeType = ch.properties.contains(.writeWithoutResponse) ? .withoutResponse : .withResponse
+                // prefer confirmed writes (lost packets are re-sent by Bluetooth); fall back if the board doesn't confirm
+                writeType = ch.properties.contains(.write) ? .withResponse : .withoutResponse
             }
             if ch.uuid == notifyUUID && ch.properties.contains(.notify) {
                 p.setNotifyValue(true, for: ch)
@@ -527,5 +538,12 @@ extension Board: CBPeripheralDelegate {
 
     func peripheralIsReady(toSendWriteWithoutResponse p: CBPeripheral) { writeMore() }
 
-    func peripheral(_ p: CBPeripheral, didWriteValueFor ch: CBCharacteristic, error: Error?) { writeMore() }
+    func peripheral(_ p: CBPeripheral, didWriteValueFor ch: CBCharacteristic, error: Error?) {
+        writeToken += 1
+        if error != nil && writeType == .withResponse {
+            writeType = .withoutResponse
+            chunkIdx = max(0, chunkIdx - 1)
+        }
+        writeMore()
+    }
 }
