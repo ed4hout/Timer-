@@ -16,12 +16,12 @@
       "tintColor": "FF3B2F",
       "versions": [
         {
-          "version": "1.0.10",
-          "buildVersion": "10",
-          "date": "2026-11-10T17:34:34Z",
-          "localizedDescription": "SideStore-bron (source.json) + automatische versienummers",
+          "version": "1.0.11",
+          "buildVersion": "11",
+          "date": "2026-11-11T19:40:07Z",
+          "localizedDescription": "Bord betrouwbaarder: bevestigd versturen, meer rust, sneller zelfherstel",
           "downloadURL": "https://github.com/ed4hout/Timer-/releases/download/app/EdsTabata.ipa",
-          "size": 449075,
+          "size": 449893,
           "minOSVersion": "17.0"
         }
       ],
