@@ -121,8 +121,8 @@ enum BoardArt {
         let label = d.paused ? looks.label(.pause) : looks.label(LookKey(d.phase))
         PixelFont.draw(&f, String(label.prefix(maxChars)), x: 0, y: 0, scale: 1, color: d.paused ? rgb(looks[.pause].hex) : col)
         let rd = d.phase == .prep ? 0 : d.round
-        var info = "\(rd)/\(cfg.rounds)"
-        if cfg.sets > 1 && PixelFont.width(info + " S\(d.set)", 1) <= leftW { info += " S\(d.set)" }
+        var info = "\(rd)/\(cfg.totalRounds)"
+        if cfg.totalSets > 1 && PixelFont.width(info + " S\(d.set)", 1) <= leftW { info += " S\(d.set)" }
         PixelFont.draw(&f, info, x: 0, y: 7, scale: 1, color: (200, 200, 200))
         let bw = max(0, leftW - 1)
         let fill = Int((Double(bw) * d.frac).rounded())

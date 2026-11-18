@@ -21,6 +21,16 @@ struct PlanView: View {
                             + Text(fmt(model.total)).font(.cond(22))
                     }
 
+                    Picker("Soort training", selection: Binding(
+                        get: { model.config.mode },
+                        set: { m in model.setMode(m) }
+                    )) {
+                        Text("Tabata").tag(WorkoutMode.tabata)
+                        Text("EMOM").tag(WorkoutMode.emom)
+                    }
+                    .pickerStyle(.segmented)
+                    .disabled(model.running)
+
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 8) {
                             Button {
@@ -64,6 +74,19 @@ struct PlanView: View {
                         }
                     }
 
+                    if model.config.isEmom {
+                        Card(padding: 12) {
+                            VStack(spacing: 0) {
+                                StepperRow(title: "Voorbereiding", dot: model.color(.prep), key: \.prep, step: 5, range: 0...60, isTime: true)
+                                Divider().overlay(Theme.line)
+                                StepperRow(title: "Elke", dot: model.color(.work), key: \.emomInterval, step: 5, range: 15...300, isTime: true)
+                                Divider().overlay(Theme.line)
+                                StepperRow(title: "Rondes", dot: .white, key: \.emomRounds, step: 1, range: 1...60, isTime: false)
+                                Divider().overlay(Theme.line)
+                                MidBeepRow()
+                            }
+                        }
+                    } else {
                     Card(padding: 12) {
                         VStack(spacing: 0) {
                             StepperRow(title: "Voorbereiding", dot: model.color(.prep), key: \.prep, step: 5, range: 0...60, isTime: true)
@@ -78,6 +101,7 @@ struct PlanView: View {
                             Divider().overlay(Theme.line)
                             StepperRow(title: "Pauze tussen sets", dot: model.color(.setrest), key: \.setrest, step: 5, range: 0...600, isTime: true)
                         }
+                    }
                     }
 
                     Card(padding: 14) {
@@ -158,6 +182,9 @@ private struct FavoriteTile: View {
 
     private var desc: String {
         let c = fav.config
+        if c.isEmom {
+            return "EMOM · \(c.emomRounds) × \(fmt(Double(c.emomInterval)))" + (c.midBeep > 0 ? " · piep \(c.midBeep)" : "")
+        }
         var s = "\(c.work)s / \(c.rest)s · \(c.rounds) rondes"
         if c.sets > 1 { s += " · \(c.sets) sets" }
         return s
@@ -202,6 +229,35 @@ private struct StepperRow: View {
                 .overlay(RoundedRectangle(cornerRadius: 11, style: .continuous).stroke(Theme.line, lineWidth: 1))
         }
         .buttonStyle(.plain)
+    }
+}
+
+/// EMOM: extra beep when the countdown shows this second.
+private struct MidBeepRow: View {
+    @EnvironmentObject var model: AppModel
+    private let options = [0, 10, 15, 20, 30, 40, 45, 50]
+
+    var body: some View {
+        HStack(spacing: 10) {
+            RoundedRectangle(cornerRadius: 3).fill(Color.white).frame(width: 10, height: 10)
+            VStack(alignment: .leading, spacing: 1) {
+                Text("Extra piep bij").font(.system(size: 16, weight: .semibold))
+                Text("als de timer op dit getal staat").font(.system(size: 11)).foregroundColor(Theme.muted)
+            }
+            Spacer()
+            Picker("Extra piep bij", selection: Binding(
+                get: { model.config.midBeep },
+                set: { v in model.setMidBeep(v) }
+            )) {
+                ForEach(options, id: \.self) { v in
+                    Text(v == 0 ? "Uit" : "\(v) sec").tag(v)
+                }
+            }
+            .pickerStyle(.menu)
+            .tint(.white)
+            .disabled(model.running)
+        }
+        .padding(.vertical, 6)
     }
 }
 

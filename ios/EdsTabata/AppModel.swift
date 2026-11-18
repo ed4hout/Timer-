@@ -115,8 +115,8 @@ final class AppModel: ObservableObject {
         let idle = !running && pausedE == 0
         return Display(phase: phase, idle: idle, paused: !running && !finished && !idle, finished: finished,
                        remain: remain, sec: Int(ceil(remain - 1e-9)), frac: frac,
-                       round: finished ? config.rounds : (seg?.round ?? 0),
-                       set: finished ? config.sets : (seg?.set ?? 1),
+                       round: finished ? config.totalRounds : (seg?.round ?? 0),
+                       set: finished ? config.totalSets : (seg?.set ?? 1),
                        left: max(0, total - e))
     }
 
@@ -229,6 +229,10 @@ final class AppModel: ObservableObject {
             if !catching && d.sec >= 1 && d.sec <= 3 && lastKey != "" && beeped != key {
                 beeped = key
                 sound.play(soundSettings.count, .count, word: "\(d.sec)")
+            } else if !catching && config.isEmom && config.midBeep > 0 && d.phase == .work
+                        && d.sec == config.midBeep && lastKey != "" && beeped != key {
+                beeped = key
+                sound.play(soundSettings.mid, .phase, word: "\(d.sec)")
             }
             lastKey = key
             refreshBoard(d)
@@ -279,7 +283,7 @@ final class AppModel: ObservableObject {
                 }
             } else {
                 let done = Display(phase: .done, idle: false, paused: false, finished: true, remain: 0, sec: 0,
-                                   frac: 0, round: config.rounds, set: config.sets, left: 0)
+                                   frac: 0, round: config.totalRounds, set: config.totalSets, left: 0)
                 frames.append(BoardArt.timer(done, cfg: config, looks: looks))
                 delays.append(60000)
             }
@@ -366,6 +370,20 @@ final class AppModel: ObservableObject {
         guard !running else { showToast("Stop eerst de timer"); return }
         var c = config
         c[keyPath: key] = min(range.upperBound, max(range.lowerBound, c[keyPath: key] + delta))
+        if c != config { config = c }
+    }
+
+    func setMode(_ m: WorkoutMode) {
+        guard !running else { showToast("Stop eerst de timer"); return }
+        var c = config
+        c.mode = m
+        if c != config { config = c }
+    }
+
+    func setMidBeep(_ v: Int) {
+        guard !running else { showToast("Stop eerst de timer"); return }
+        var c = config
+        c.midBeep = v
         if c != config { config = c }
     }
 

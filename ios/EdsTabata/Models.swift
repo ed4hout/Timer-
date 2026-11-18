@@ -6,13 +6,42 @@ enum Phase: String, Codable, CaseIterable {
     case prep, work, rest, setrest, done
 }
 
+enum WorkoutMode: String, Codable { case tabata, emom }
+
 struct WorkoutConfig: Codable, Equatable {
+    var mode: WorkoutMode = .tabata
     var prep = 10
     var work = 20
     var rest = 10
     var rounds = 8
     var sets = 1
     var setrest = 60
+    // EMOM: every interval (minute) starts again and counts down
+    var emomRounds = 10
+    var emomInterval = 60
+    /// Extra beep when the countdown shows this second (0 = off)
+    var midBeep = 30
+
+    init() {}
+
+    // Tolerant decoding: trainings saved by older versions keep working.
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        mode = try c.decodeIfPresent(WorkoutMode.self, forKey: .mode) ?? .tabata
+        prep = try c.decodeIfPresent(Int.self, forKey: .prep) ?? 10
+        work = try c.decodeIfPresent(Int.self, forKey: .work) ?? 20
+        rest = try c.decodeIfPresent(Int.self, forKey: .rest) ?? 10
+        rounds = try c.decodeIfPresent(Int.self, forKey: .rounds) ?? 8
+        sets = try c.decodeIfPresent(Int.self, forKey: .sets) ?? 1
+        setrest = try c.decodeIfPresent(Int.self, forKey: .setrest) ?? 60
+        emomRounds = try c.decodeIfPresent(Int.self, forKey: .emomRounds) ?? 10
+        emomInterval = try c.decodeIfPresent(Int.self, forKey: .emomInterval) ?? 60
+        midBeep = try c.decodeIfPresent(Int.self, forKey: .midBeep) ?? 30
+    }
+
+    var isEmom: Bool { mode == .emom }
+    var totalRounds: Int { isEmom ? emomRounds : rounds }
+    var totalSets: Int { isEmom ? 1 : sets }
 }
 
 struct Segment: Equatable {
@@ -25,6 +54,12 @@ struct Segment: Equatable {
 func buildSegments(_ c: WorkoutConfig) -> [Segment] {
     var s: [Segment] = []
     if c.prep > 0 { s.append(Segment(phase: .prep, dur: c.prep, round: 0, set: 1)) }
+    if c.isEmom {
+        for r in 1...max(1, c.emomRounds) {
+            s.append(Segment(phase: .work, dur: max(5, c.emomInterval), round: r, set: 1))
+        }
+        return s
+    }
     for st in 1...max(1, c.sets) {
         for r in 1...max(1, c.rounds) {
             s.append(Segment(phase: .work, dur: c.work, round: r, set: st))
@@ -135,8 +170,23 @@ struct SoundSettings: Codable, Equatable {
     var work: SoundChoice = .boxing
     var rest: SoundChoice = .bell
     var done: SoundChoice = .gong
+    /// EMOM: extra signal at the chosen second
+    var mid: SoundChoice = .double
     /// Lower other music (Spotify) while a workout runs.
     var duck: Bool = false
+
+    init() {}
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        volume = try c.decodeIfPresent(Double.self, forKey: .volume) ?? 0.9
+        count = try c.decodeIfPresent(SoundChoice.self, forKey: .count) ?? .beep
+        work = try c.decodeIfPresent(SoundChoice.self, forKey: .work) ?? .boxing
+        rest = try c.decodeIfPresent(SoundChoice.self, forKey: .rest) ?? .bell
+        done = try c.decodeIfPresent(SoundChoice.self, forKey: .done) ?? .gong
+        mid = try c.decodeIfPresent(SoundChoice.self, forKey: .mid) ?? .double
+        duck = try c.decodeIfPresent(Bool.self, forKey: .duck) ?? false
+    }
 }
 
 // MARK: - Persistence

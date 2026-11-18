@@ -48,13 +48,13 @@ struct TimerView: View {
                     }
                     .frame(width: ring, height: ring)
 
-                    RoundBars(rounds: model.config.rounds, current: d.phase == .prep ? 0 : d.round,
+                    RoundBars(rounds: model.config.totalRounds, current: d.phase == .prep ? 0 : d.round,
                               phase: d.phase, finished: d.finished, color: col)
                         .padding(.top, 12)
 
                     HStack {
-                        Meta(value: "\(d.phase == .prep ? 0 : d.round)/\(model.config.rounds)", label: "Ronde")
-                        Meta(value: "\(d.set)/\(model.config.sets)", label: "Set")
+                        Meta(value: "\(d.phase == .prep ? 0 : d.round)/\(model.config.totalRounds)", label: model.config.isEmom ? "Minuut" : "Ronde")
+                        Meta(value: "\(d.set)/\(model.config.totalSets)", label: "Set")
                         Meta(value: fmt(d.left), label: "Resterend")
                     }
                     .padding(.top, 8)
@@ -105,7 +105,7 @@ private struct RoundBars: View {
     let color: Color
 
     var body: some View {
-        HStack(spacing: 5) {
+        HStack(spacing: rounds > 16 ? 2 : 5) {
             ForEach(1...max(1, rounds), id: \.self) { n in
                 RoundedRectangle(cornerRadius: 3)
                     .fill(fill(n))
