@@ -100,6 +100,8 @@ struct PlanView: View {
                             StepperRow(title: "Sets", dot: .white, key: \.sets, step: 1, range: 1...10, isTime: false)
                             Divider().overlay(Theme.line)
                             StepperRow(title: "Pauze tussen sets", dot: model.color(.setrest), key: \.setrest, step: 5, range: 0...600, isTime: true)
+                            Divider().overlay(Theme.line)
+                            MidBeepRow()
                         }
                     }
                     }
@@ -235,14 +237,14 @@ private struct StepperRow: View {
 /// EMOM: extra beep when the countdown shows this second.
 private struct MidBeepRow: View {
     @EnvironmentObject var model: AppModel
-    private let options = [0, 10, 15, 20, 30, 40, 45, 50]
+    private let options = [0, 5, 10, 15, 20, 30, 40, 45, 50]
 
     var body: some View {
         HStack(spacing: 10) {
             RoundedRectangle(cornerRadius: 3).fill(Color.white).frame(width: 10, height: 10)
             VStack(alignment: .leading, spacing: 1) {
                 Text("Extra piep bij").font(.system(size: 16, weight: .semibold))
-                Text("als de timer op dit getal staat").font(.system(size: 11)).foregroundColor(Theme.muted)
+                Text("tijdens werk, als de timer hierop staat").font(.system(size: 11)).foregroundColor(Theme.muted)
             }
             Spacer()
             Picker("Extra piep bij", selection: Binding(

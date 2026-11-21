@@ -99,7 +99,7 @@ struct BoardView: View {
                         SoundRow(title: "Start werk", key: \.work, kind: .phase, word: model.looks.label(.work))
                         SoundRow(title: "Start rust", key: \.rest, kind: .phase, word: model.looks.label(.rest))
                         SoundRow(title: "Einde", key: \.done, kind: .done, word: model.looks.label(.done))
-                        SoundRow(title: "Extra piep (EMOM)", key: \.mid, kind: .phase, word: "\(model.config.midBeep)")
+                        SoundRow(title: "Extra piep", key: \.mid, kind: .phase, word: "\(model.config.midBeep)")
                         Toggle(isOn: $model.soundSettings.duck) {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("Muziek zachter tijdens training").font(.system(size: 15, weight: .medium))

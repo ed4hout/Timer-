@@ -229,7 +229,7 @@ final class AppModel: ObservableObject {
             if !catching && d.sec >= 1 && d.sec <= 3 && lastKey != "" && beeped != key {
                 beeped = key
                 sound.play(soundSettings.count, .count, word: "\(d.sec)")
-            } else if !catching && config.isEmom && config.midBeep > 0 && d.phase == .work
+            } else if !catching && config.midBeep > 0 && d.phase == .work
                         && d.sec == config.midBeep && lastKey != "" && beeped != key {
                 beeped = key
                 sound.play(soundSettings.mid, .phase, word: "\(d.sec)")

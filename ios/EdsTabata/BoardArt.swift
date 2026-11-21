@@ -97,8 +97,9 @@ enum BoardArt {
     static func timer(_ d: Display, cfg: WorkoutConfig, looks: Looks) -> Frame {
         var f = Frame()
         if d.idle {
-            let t = "TABATA"
-            PixelFont.draw(&f, t, x: (Frame.w - PixelFont.width(t, 2)) / 2, y: 3, scale: 2, color: rgb(looks[.done].hex))
+            let t = looks.label(.idle)
+            let sc = PixelFont.width(t, 3) <= Frame.w ? 3 : (PixelFont.width(t, 2) <= Frame.w ? 2 : 1)
+            PixelFont.draw(&f, t, x: (Frame.w - PixelFont.width(t, sc)) / 2, y: sc == 3 ? 0 : (sc == 2 ? 3 : 5), scale: sc, color: rgb(looks[.idle].hex))
             return f
         }
         if d.finished {

@@ -83,15 +83,16 @@ func fmt(_ seconds: Double) -> String {
 // MARK: - Texts & colours per phase
 
 enum LookKey: String, Codable, CaseIterable, Identifiable {
-    case prep, work, rest, setrest, done, pause
+    case idle, prep, work, rest, setrest, done, pause
     var id: String { rawValue }
     var title: String {
         switch self {
+        case .idle: return "Voor training"
         case .prep: return "Voorbereiden"
         case .work: return "Werk"
         case .rest: return "Rust"
         case .setrest: return "Setpauze"
-        case .done: return "Einde"
+        case .done: return "Na training"
         case .pause: return "Pauze"
         }
     }
@@ -105,6 +106,7 @@ struct PhaseLook: Codable, Equatable {
 
 struct Looks: Codable, Equatable {
     static let defaults: [LookKey: PhaseLook] = [
+        .idle: PhaseLook(text: "TABATA", hex: "#C6FF00"),
         .prep: PhaseLook(text: "START", hex: "#FFCC00"),
         .work: PhaseLook(text: "WERK", hex: "#FF2A1F"),
         .rest: PhaseLook(text: "RUST", hex: "#18E070"),
