@@ -16,12 +16,12 @@
       "tintColor": "FF3B2F",
       "versions": [
         {
-          "version": "1.0.17",
-          "buildVersion": "17",
-          "date": "2026-11-21T11:30:50Z",
-          "localizedDescription": "Build: Intel-runner opnieuw",
+          "version": "1.0.18",
+          "buildVersion": "18",
+          "date": "2026-11-21T12:05:11Z",
+          "localizedDescription": "Extra piep ook bij tabata; eigen tekst/kleur voor en na de training op het bord",
           "downloadURL": "https://github.com/ed4hout/Timer-/releases/download/app/EdsTabata.ipa",
-          "size": 468008,
+          "size": 468407,
           "minOSVersion": "17.0"
         }
       ],
