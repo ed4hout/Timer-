@@ -16,12 +16,12 @@
       "tintColor": "FF3B2F",
       "versions": [
         {
-          "version": "1.0.18",
-          "buildVersion": "18",
-          "date": "2026-11-21T12:05:11Z",
-          "localizedDescription": "Extra piep ook bij tabata; eigen tekst/kleur voor en na de training op het bord",
+          "version": "1.0.19",
+          "buildVersion": "19",
+          "date": "2026-11-21T12:22:04Z",
+          "localizedDescription": "Werk en rust tot 20:00",
           "downloadURL": "https://github.com/ed4hout/Timer-/releases/download/app/EdsTabata.ipa",
-          "size": 468407,
+          "size": 468411,
           "minOSVersion": "17.0"
         }
       ],
