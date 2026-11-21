@@ -91,9 +91,9 @@ struct PlanView: View {
                         VStack(spacing: 0) {
                             StepperRow(title: "Voorbereiding", dot: model.color(.prep), key: \.prep, step: 5, range: 0...60, isTime: true)
                             Divider().overlay(Theme.line)
-                            StepperRow(title: "Werk", dot: model.color(.work), key: \.work, step: 5, range: 5...600, isTime: true)
+                            StepperRow(title: "Werk", dot: model.color(.work), key: \.work, step: 5, range: 5...1200, isTime: true)
                             Divider().overlay(Theme.line)
-                            StepperRow(title: "Rust", dot: model.color(.rest), key: \.rest, step: 5, range: 0...600, isTime: true)
+                            StepperRow(title: "Rust", dot: model.color(.rest), key: \.rest, step: 5, range: 0...1200, isTime: true)
                             Divider().overlay(Theme.line)
                             StepperRow(title: "Rondes", dot: .white, key: \.rounds, step: 1, range: 1...30, isTime: false)
                             Divider().overlay(Theme.line)
