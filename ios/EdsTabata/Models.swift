@@ -162,7 +162,9 @@ struct Favorite: Codable, Identifiable, Equatable {
 // MARK: - Sound
 
 enum SoundChoice: String, Codable, CaseIterable, Identifiable {
-    case off, beep, high, double, click, bell, boxing, whistle, gong, horn, voice
+    case off, beep, high, double, click, bell, boxing, whistle, gong, horn
+    case buzzer, airhorn, triangle, woodblock, drum, chimeUp, chimeDown, cowbell, arcade, laser, siren, marimba
+    case voice
     var id: String { rawValue }
     var title: String {
         switch self {
@@ -176,6 +178,18 @@ enum SoundChoice: String, Codable, CaseIterable, Identifiable {
         case .whistle: return "Fluitje"
         case .gong: return "Gong"
         case .horn: return "Hoorn"
+        case .buzzer: return "Scorebord-zoemer"
+        case .airhorn: return "Toeter"
+        case .triangle: return "Triangel"
+        case .woodblock: return "Houtblok"
+        case .drum: return "Trommel"
+        case .chimeUp: return "Belletjes omhoog"
+        case .chimeDown: return "Belletjes omlaag"
+        case .cowbell: return "Koebel"
+        case .arcade: return "Arcade"
+        case .laser: return "Laser"
+        case .siren: return "Sirene"
+        case .marimba: return "Marimba"
         case .voice: return "Stem"
         }
     }

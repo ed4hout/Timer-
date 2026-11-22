@@ -147,6 +147,52 @@ enum Synth {
             for (f, a) in [(110.0, 1.0), (164.0, 0.6), (221.0, 0.5), (331.0, 0.3), (442.0, 0.2)] {
                 m.tone(f, short ? 0.8 : 3.2, vol: 0.45 * a, attack: 0.004)
             }
+        case .buzzer:
+            m.tone(110, short ? 0.25 : 0.9, wave: .square, vol: 0.35, attack: 0.005, sustain: true)
+            m.tone(116, short ? 0.25 : 0.9, wave: .saw, vol: 0.25, attack: 0.005, sustain: true)
+        case .airhorn:
+            for f in [440.0, 554.0, 659.0] {
+                m.tone(f, short ? 0.3 : 1.0, wave: .saw, vol: 0.18, attack: 0.02, vibratoRate: 6, vibratoDepth: 4, sustain: true)
+            }
+        case .triangle:
+            m.tone(4200, short ? 0.6 : 1.8, vol: 0.5, attack: 0.002)
+            m.tone(5600, short ? 0.5 : 1.5, vol: 0.2, attack: 0.002)
+        case .woodblock:
+            m.tone(1000, 0.08, vol: 0.8, attack: 0.001)
+            m.noise(0.02, vol: 0.4)
+            if !short { m.tone(800, 0.08, vol: 0.8, at: 0.14, attack: 0.001) }
+        case .drum:
+            m.tone(150, 0.35, vol: 0.9, attack: 0.001, slide: 0.33)
+            m.noise(0.05, vol: 0.5)
+            if !short {
+                m.tone(150, 0.35, vol: 0.9, at: 0.2, attack: 0.001, slide: 0.33)
+                m.tone(150, 0.45, vol: 0.9, at: 0.4, attack: 0.001, slide: 0.33)
+            }
+        case .chimeUp, .chimeDown:
+            var notes = short ? [1047.0, 1319.0] : [1047.0, 1319.0, 1568.0, 2093.0]
+            if c == .chimeDown { notes.reverse() }
+            for (i, f) in notes.enumerated() { m.bell(f, at: Double(i) * 0.12, len: 0.6, vol: 0.4) }
+        case .cowbell:
+            m.tone(540, short ? 0.3 : 0.6, wave: .square, vol: 0.25, attack: 0.001)
+            m.tone(800, short ? 0.3 : 0.6, wave: .square, vol: 0.25, attack: 0.001)
+            if !short {
+                m.tone(540, 0.5, wave: .square, vol: 0.25, at: 0.25, attack: 0.001)
+                m.tone(800, 0.5, wave: .square, vol: 0.25, at: 0.25, attack: 0.001)
+            }
+        case .arcade:
+            m.tone(988, 0.08, wave: .square, vol: 0.4, attack: 0.001, sustain: true)
+            m.tone(1319, short ? 0.15 : 0.4, wave: .square, vol: 0.4, at: 0.08, attack: 0.001)
+        case .laser:
+            m.tone(1800, short ? 0.2 : 0.45, wave: .square, vol: 0.35, attack: 0.002, slide: 0.15)
+        case .siren:
+            m.tone(600, short ? 0.25 : 0.5, vol: 0.6, attack: 0.02, slide: 2, sustain: true)
+            if !short { m.tone(1200, 0.5, vol: 0.6, at: 0.5, attack: 0.01, slide: 0.5, sustain: true) }
+        case .marimba:
+            let notes = short ? [880.0] : [659.0, 880.0, 1319.0]
+            for (i, f) in notes.enumerated() {
+                m.tone(f, 0.5, vol: 0.7, at: Double(i) * 0.13, attack: 0.002)
+                m.tone(f * 4, 0.12, vol: 0.2, at: Double(i) * 0.13, attack: 0.002)
+            }
         case .horn:
             m.tone(233, short ? 0.25 : 0.9, wave: .saw, vol: 0.12, attack: 0.03)
             m.tone(233.6, short ? 0.25 : 0.9, wave: .square, vol: 0.12, attack: 0.03)
@@ -169,7 +215,8 @@ struct Mixer {
     }
 
     mutating func tone(_ f: Double, _ dur: Double, wave: Wave = .sine, vol: Double = 0.5, at: Double = 0,
-                       attack: Double = 0.005, vibratoRate: Double = 0, vibratoDepth: Double = 0) {
+                       attack: Double = 0.005, vibratoRate: Double = 0, vibratoDepth: Double = 0,
+                       slide: Double = 0, sustain: Bool = false) {
         let start = Int(at * sampleRate)
         let n = Int(dur * sampleRate)
         ensure(start + n)
@@ -177,7 +224,8 @@ struct Mixer {
         var phase = 0.0
         for i in 0..<n {
             let t = Double(i) / sampleRate
-            let freq = f + vibratoDepth * sin(2 * Double.pi * vibratoRate * t)
+            let base = slide > 0 ? f * pow(slide, t / dur) : f
+            let freq = base + vibratoDepth * sin(2 * Double.pi * vibratoRate * t)
             phase += freq / sampleRate
             phase -= phase.rounded(.down)
             let x: Double
@@ -189,6 +237,9 @@ struct Mixer {
             let env: Double
             if t < attack {
                 env = low * pow(vol / low, t / attack)
+            } else if sustain {
+                let rel = 0.06
+                env = t > dur - rel ? vol * max(0, (dur - t) / rel) : vol
             } else {
                 env = vol * pow(low / vol, (t - attack) / max(0.001, dur - attack))
             }
