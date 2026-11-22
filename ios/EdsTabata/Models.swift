@@ -6,7 +6,7 @@ enum Phase: String, Codable, CaseIterable {
     case prep, work, rest, setrest, done
 }
 
-enum WorkoutMode: String, Codable { case tabata, emom }
+enum WorkoutMode: String, Codable { case tabata, emom, countdown, stopwatch }
 
 struct WorkoutConfig: Codable, Equatable {
     var mode: WorkoutMode = .tabata
@@ -21,6 +21,9 @@ struct WorkoutConfig: Codable, Equatable {
     var emomInterval = 60
     /// Extra beep when the countdown shows this second (0 = off)
     var midBeep = 30
+    // Countdown (aftellen)
+    var cdMin = 5
+    var cdSec = 0
 
     init() {}
 
@@ -37,11 +40,17 @@ struct WorkoutConfig: Codable, Equatable {
         emomRounds = try c.decodeIfPresent(Int.self, forKey: .emomRounds) ?? 10
         emomInterval = try c.decodeIfPresent(Int.self, forKey: .emomInterval) ?? 60
         midBeep = try c.decodeIfPresent(Int.self, forKey: .midBeep) ?? 30
+        cdMin = try c.decodeIfPresent(Int.self, forKey: .cdMin) ?? 5
+        cdSec = try c.decodeIfPresent(Int.self, forKey: .cdSec) ?? 0
     }
 
     var isEmom: Bool { mode == .emom }
-    var totalRounds: Int { isEmom ? emomRounds : rounds }
-    var totalSets: Int { isEmom ? 1 : sets }
+    var isStopwatch: Bool { mode == .stopwatch }
+    /// Countdown and stopwatch: one block, no rounds/sets
+    var isSimple: Bool { mode == .countdown || mode == .stopwatch }
+    var countdown: Int { max(5, cdMin * 60 + cdSec) }
+    var totalRounds: Int { isSimple ? 1 : (isEmom ? emomRounds : rounds) }
+    var totalSets: Int { (isEmom || isSimple) ? 1 : sets }
 }
 
 struct Segment: Equatable {
@@ -54,6 +63,14 @@ struct Segment: Equatable {
 func buildSegments(_ c: WorkoutConfig) -> [Segment] {
     var s: [Segment] = []
     if c.prep > 0 { s.append(Segment(phase: .prep, dur: c.prep, round: 0, set: 1)) }
+    if c.mode == .countdown {
+        s.append(Segment(phase: .work, dur: c.countdown, round: 1, set: 1))
+        return s
+    }
+    if c.isStopwatch {
+        s.append(Segment(phase: .work, dur: 99 * 60 + 59, round: 1, set: 1)) // runs until you stop it
+        return s
+    }
     if c.isEmom {
         for r in 1...max(1, c.emomRounds) {
             s.append(Segment(phase: .work, dur: max(5, c.emomInterval), round: r, set: 1))

@@ -48,6 +48,10 @@ struct TimerView: View {
                     }
                     .frame(width: ring, height: ring)
 
+                    if model.config.isSimple {
+                        Meta(value: fmt(d.left), label: model.config.isStopwatch ? "Verstreken" : "Resterend")
+                            .padding(.top, 12)
+                    } else {
                     RoundBars(rounds: model.config.totalRounds, current: d.phase == .prep ? 0 : d.round,
                               phase: d.phase, finished: d.finished, color: col)
                         .padding(.top, 12)
@@ -58,6 +62,7 @@ struct TimerView: View {
                         Meta(value: fmt(d.left), label: "Resterend")
                     }
                     .padding(.top, 8)
+                    }
 
                     HStack(spacing: 28) {
                         RoundIcon(system: "arrow.counterclockwise") { model.reset() }

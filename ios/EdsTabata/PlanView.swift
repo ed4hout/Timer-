@@ -27,6 +27,8 @@ struct PlanView: View {
                     )) {
                         Text("Tabata").tag(WorkoutMode.tabata)
                         Text("EMOM").tag(WorkoutMode.emom)
+                        Text("Aftellen").tag(WorkoutMode.countdown)
+                        Text("Stopwatch").tag(WorkoutMode.stopwatch)
                     }
                     .pickerStyle(.segmented)
                     .disabled(model.running)
@@ -74,7 +76,29 @@ struct PlanView: View {
                         }
                     }
 
-                    if model.config.isEmom {
+                    if model.config.mode == .countdown {
+                        Card(padding: 12) {
+                            VStack(spacing: 0) {
+                                StepperRow(title: "Voorbereiding", dot: model.color(.prep), key: \.prep, step: 5, range: 0...60, isTime: true)
+                                Divider().overlay(Theme.line)
+                                StepperRow(title: "Minuten", dot: model.color(.work), key: \.cdMin, step: 1, range: 0...99, isTime: false)
+                                Divider().overlay(Theme.line)
+                                StepperRow(title: "Seconden", dot: model.color(.work), key: \.cdSec, step: 5, range: 0...55, isTime: false)
+                                Divider().overlay(Theme.line)
+                                MidBeepRow()
+                            }
+                        }
+                    } else if model.config.isStopwatch {
+                        Card(padding: 12) {
+                            VStack(alignment: .leading, spacing: 0) {
+                                StepperRow(title: "Voorbereiding", dot: model.color(.prep), key: \.prep, step: 5, range: 0...60, isTime: true)
+                                Divider().overlay(Theme.line)
+                                Text("Telt op vanaf 0:00 tot je op pauze of reset drukt (max. 99:59).")
+                                    .font(.system(size: 12)).foregroundColor(Theme.muted)
+                                    .padding(.vertical, 10)
+                            }
+                        }
+                    } else if model.config.isEmom {
                         Card(padding: 12) {
                             VStack(spacing: 0) {
                                 StepperRow(title: "Voorbereiding", dot: model.color(.prep), key: \.prep, step: 5, range: 0...60, isTime: true)
@@ -184,6 +208,8 @@ private struct FavoriteTile: View {
 
     private var desc: String {
         let c = fav.config
+        if c.mode == .countdown { return "Aftellen · \(fmt(Double(c.countdown)))" }
+        if c.isStopwatch { return "Stopwatch" }
         if c.isEmom {
             return "EMOM · \(c.emomRounds) × \(fmt(Double(c.emomInterval)))" + (c.midBeep > 0 ? " · piep \(c.midBeep)" : "")
         }

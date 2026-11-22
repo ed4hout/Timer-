@@ -113,11 +113,13 @@ final class AppModel: ObservableObject {
         let remain = finished ? 0 : max(0, dur - p.el)
         let frac = (finished || dur == 0) ? 0 : 1 - remain / dur
         let idle = !running && pausedE == 0
+        let up = config.isStopwatch && phase == .work && !finished
         return Display(phase: phase, idle: idle, paused: !running && !finished && !idle, finished: finished,
-                       remain: remain, sec: Int(ceil(remain - 1e-9)), frac: frac,
+                       remain: remain, sec: up ? Int(floor(p.el + 1e-9)) : Int(ceil(remain - 1e-9)),
+                       frac: up ? p.el.truncatingRemainder(dividingBy: 60) / 60 : frac,
                        round: finished ? config.totalRounds : (seg?.round ?? 0),
                        set: finished ? config.totalSets : (seg?.set ?? 1),
-                       left: max(0, total - e))
+                       left: up ? p.el : max(0, total - e), up: up)
     }
 
     func toggle() { running ? pause() : start() }
@@ -226,10 +228,10 @@ final class AppModel: ObservableObject {
         let d = display
         let key = "\(p.idx):\(d.sec)"
         if key != lastKey {
-            if !catching && d.sec >= 1 && d.sec <= 3 && lastKey != "" && beeped != key {
+            if !catching && !d.up && d.sec >= 1 && d.sec <= 3 && lastKey != "" && beeped != key {
                 beeped = key
                 sound.play(soundSettings.count, .count, word: "\(d.sec)")
-            } else if !catching && config.midBeep > 0 && d.phase == .work
+            } else if !catching && !d.up && config.midBeep > 0 && d.phase == .work
                         && d.sec == config.midBeep && lastKey != "" && beeped != key {
                 beeped = key
                 sound.play(soundSettings.mid, .phase, word: "\(d.sec)")

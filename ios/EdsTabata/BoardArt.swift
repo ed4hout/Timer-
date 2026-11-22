@@ -91,6 +91,8 @@ struct Display {
     var round: Int
     var set: Int
     var left: Double
+    /// Stopwatch: counts up
+    var up: Bool = false
 }
 
 enum BoardArt {
@@ -122,7 +124,7 @@ enum BoardArt {
         let label = d.paused ? looks.label(.pause) : looks.label(LookKey(d.phase))
         PixelFont.draw(&f, String(label.prefix(maxChars)), x: 0, y: 0, scale: 1, color: d.paused ? rgb(looks[.pause].hex) : col)
         let rd = d.phase == .prep ? 0 : d.round
-        var info = "\(rd)/\(cfg.totalRounds)"
+        var info = cfg.isSimple ? "" : "\(rd)/\(cfg.totalRounds)"
         if cfg.totalSets > 1 && PixelFont.width(info + " S\(d.set)", 1) <= leftW { info += " S\(d.set)" }
         PixelFont.draw(&f, info, x: 0, y: 7, scale: 1, color: (200, 200, 200))
         let bw = max(0, leftW - 1)
