@@ -16,12 +16,12 @@
       "tintColor": "FF3B2F",
       "versions": [
         {
-          "version": "1.0.21",
-          "buildVersion": "21",
-          "date": "2026-11-22T18:26:39Z",
-          "localizedDescription": "Bord: vanaf 60 seconden altijd als minuten (1:00)",
+          "version": "1.0.22",
+          "buildVersion": "22",
+          "date": "2026-11-22T18:36:46Z",
+          "localizedDescription": "Live Activity: timer op vergrendelscherm en Dynamic Island",
           "downloadURL": "https://github.com/ed4hout/Timer-/releases/download/app/EdsTabata.ipa",
-          "size": 476315,
+          "size": 536273,
           "minOSVersion": "17.0"
         }
       ],
