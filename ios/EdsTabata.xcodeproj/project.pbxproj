@@ -7,37 +7,76 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		48D1420DAEF7558667575E94 /* EdsTabataApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5986DC1A442A6C972C9BCD83 /* EdsTabataApp.swift */; };
-		B6481E95F245E6FBF037677E /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F7A30D8B3A7D72DDC7D3157 /* AppModel.swift */; };
-		805A6232D3EC900D44609D82 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74A5E9BA8482415525970AE5 /* Models.swift */; };
-		A0866D4F98BDC2F177006174 /* BoardArt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6922077F7A5D0A47D6DC453F /* BoardArt.swift */; };
-		D61EE6F4AFEEC6DA520EEE37 /* Board.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F8C5257FE170974906C91C4 /* Board.swift */; };
-		953D2D2E46D49372764462D0 /* Sound.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B3BE90E995DF3B9790750A1 /* Sound.swift */; };
-		A55376DB9A850FBEC27D5DCD /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72E5D15B542CECD5967F2F27 /* Theme.swift */; };
-		37A48C17642FAA006AE3C941 /* TimerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 677B9B4BF1E02A998D6DEFFF /* TimerView.swift */; };
-		8F1D6D6DE14A25D01D4F7E09 /* PlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EA882CB941F320437DAC03B /* PlanView.swift */; };
-		AE807817786A98EA884014A4 /* BoardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 451E27ECFBC59A4EBFE2E330 /* BoardView.swift */; };
-		D2F5194FE84B22D9A53E0650 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 32BB636196F91ED59D7A4919 /* Assets.xcassets */; };
+		7F43685501834A4EF59CE555 /* EdsTabataApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BFB130F5433DBC8098FA5F4 /* EdsTabataApp.swift */; };
+		5C1255E0EDA61BD03403D6F8 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F59701DB6BC54A72BD3648AF /* AppModel.swift */; };
+		3A8F07721CA737C3536036E3 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BD84ED7D5D0144E2A03997D /* Models.swift */; };
+		F3B89EC50D383485D9BBEB29 /* BoardArt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48275ACF5BA84B143A7C7C62 /* BoardArt.swift */; };
+		D2738779D670D4F466277E0B /* Board.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63C3D83C7663781ED6B8B5C5 /* Board.swift */; };
+		274DEA65F880EEF0EB1D9691 /* Sound.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1403360481D261003AF06354 /* Sound.swift */; };
+		7168866038FDB5F6E338EFC2 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5180B43727B4150C39A012E6 /* Theme.swift */; };
+		AAF37CE3769A525D3E9085B9 /* TimerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA657EA93F56AF9E244DF31D /* TimerView.swift */; };
+		8723C5FA2D4B8C82E0BE93C8 /* PlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 436EC7846F8AC174417F658A /* PlanView.swift */; };
+		D7335AE4CF8DE4A0D5832FFE /* BoardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6044226BE0048DF49EFF1A17 /* BoardView.swift */; };
+		5DE476C4A23F0689A63B477B /* LiveActivityShared.swift in Sources */ = {isa = PBXBuildFile; fileRef = C98DE5C0D55AE5D025CAAE60 /* LiveActivityShared.swift */; };
+		2A4F2811D995DD5A6313E5EF /* EdsTabataWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FCB2E476A963C97C2880EC1 /* EdsTabataWidget.swift */; };
+		6F9AA9FC91C96D028A600634 /* LiveActivityShared.swift in Sources */ = {isa = PBXBuildFile; fileRef = C98DE5C0D55AE5D025CAAE60 /* LiveActivityShared.swift */; };
+		24C30FDD1880722BB3997422 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B3A61513E3E0BB9081C2DF56 /* Assets.xcassets */; };
+		C0AFA12DD2078E5820A15B25 /* EdsTabataWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 21A02E441C64048FA40B03E1 /* EdsTabataWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		5A3EF722437A398C1DFC36F9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3E64D0239AE8980B665776AA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = CED450424B38613A325621E5;
+			remoteInfo = EdsTabataWidget;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		178435F346279A40C3D6C876 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				C0AFA12DD2078E5820A15B25 /* EdsTabataWidget.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
-		D2A57DC1D883FD21FB995169 /* EdsTabata.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EdsTabata.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		5986DC1A442A6C972C9BCD83 /* EdsTabataApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EdsTabataApp.swift; sourceTree = "<group>"; };
-		8F7A30D8B3A7D72DDC7D3157 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
-		74A5E9BA8482415525970AE5 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
-		6922077F7A5D0A47D6DC453F /* BoardArt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardArt.swift; sourceTree = "<group>"; };
-		0F8C5257FE170974906C91C4 /* Board.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Board.swift; sourceTree = "<group>"; };
-		1B3BE90E995DF3B9790750A1 /* Sound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sound.swift; sourceTree = "<group>"; };
-		72E5D15B542CECD5967F2F27 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
-		677B9B4BF1E02A998D6DEFFF /* TimerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerView.swift; sourceTree = "<group>"; };
-		3EA882CB941F320437DAC03B /* PlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanView.swift; sourceTree = "<group>"; };
-		451E27ECFBC59A4EBFE2E330 /* BoardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardView.swift; sourceTree = "<group>"; };
-		32BB636196F91ED59D7A4919 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		CAF9B6B99962BF5C22648242 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		7589956BF9A29865A76E2E88 /* EdsTabata.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EdsTabata.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		21A02E441C64048FA40B03E1 /* EdsTabataWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = EdsTabataWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		4BFB130F5433DBC8098FA5F4 /* EdsTabataApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EdsTabataApp.swift; sourceTree = "<group>"; };
+		F59701DB6BC54A72BD3648AF /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
+		6BD84ED7D5D0144E2A03997D /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		48275ACF5BA84B143A7C7C62 /* BoardArt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardArt.swift; sourceTree = "<group>"; };
+		63C3D83C7663781ED6B8B5C5 /* Board.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Board.swift; sourceTree = "<group>"; };
+		1403360481D261003AF06354 /* Sound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sound.swift; sourceTree = "<group>"; };
+		5180B43727B4150C39A012E6 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		AA657EA93F56AF9E244DF31D /* TimerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerView.swift; sourceTree = "<group>"; };
+		436EC7846F8AC174417F658A /* PlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanView.swift; sourceTree = "<group>"; };
+		6044226BE0048DF49EFF1A17 /* BoardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardView.swift; sourceTree = "<group>"; };
+		C98DE5C0D55AE5D025CAAE60 /* LiveActivityShared.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityShared.swift; sourceTree = "<group>"; };
+		9FCB2E476A963C97C2880EC1 /* EdsTabataWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EdsTabataWidget.swift; sourceTree = "<group>"; };
+		B3A61513E3E0BB9081C2DF56 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		DA29923590A9AAAE45B8F419 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		AA095C734B954F9E52830F63 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		DAF6AA633395B1B76148E35B /* Frameworks */ = {
+		C696C3992DCD796794A05847 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		36E8DE2BDA383FE748B79590 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -47,37 +86,49 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		2B731CEFC6751AAE0EC69B98 = {
+		6FE2ACAF1461FE7AD8E43C26 = {
 			isa = PBXGroup;
 			children = (
-				D8DBA3F9900DD17689CA0C4D /* EdsTabata */,
-				86024CAD1E83101D97359D73 /* Products */,
+				6F0F684C541DFF2CBFBCAAA0 /* EdsTabata */,
+				2A166480F36D7DFE6B77E5BB /* EdsTabataWidget */,
+				1AB7A5EB5E114DE88C550AEA /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		D8DBA3F9900DD17689CA0C4D /* EdsTabata */ = {
+		6F0F684C541DFF2CBFBCAAA0 /* EdsTabata */ = {
 			isa = PBXGroup;
 			children = (
-				5986DC1A442A6C972C9BCD83 /* EdsTabataApp.swift */,
-				8F7A30D8B3A7D72DDC7D3157 /* AppModel.swift */,
-				74A5E9BA8482415525970AE5 /* Models.swift */,
-				6922077F7A5D0A47D6DC453F /* BoardArt.swift */,
-				0F8C5257FE170974906C91C4 /* Board.swift */,
-				1B3BE90E995DF3B9790750A1 /* Sound.swift */,
-				72E5D15B542CECD5967F2F27 /* Theme.swift */,
-				677B9B4BF1E02A998D6DEFFF /* TimerView.swift */,
-				3EA882CB941F320437DAC03B /* PlanView.swift */,
-				451E27ECFBC59A4EBFE2E330 /* BoardView.swift */,
-				32BB636196F91ED59D7A4919 /* Assets.xcassets */,
-				CAF9B6B99962BF5C22648242 /* Info.plist */,
+				4BFB130F5433DBC8098FA5F4 /* EdsTabataApp.swift */,
+				F59701DB6BC54A72BD3648AF /* AppModel.swift */,
+				6BD84ED7D5D0144E2A03997D /* Models.swift */,
+				48275ACF5BA84B143A7C7C62 /* BoardArt.swift */,
+				63C3D83C7663781ED6B8B5C5 /* Board.swift */,
+				1403360481D261003AF06354 /* Sound.swift */,
+				5180B43727B4150C39A012E6 /* Theme.swift */,
+				AA657EA93F56AF9E244DF31D /* TimerView.swift */,
+				436EC7846F8AC174417F658A /* PlanView.swift */,
+				6044226BE0048DF49EFF1A17 /* BoardView.swift */,
+				C98DE5C0D55AE5D025CAAE60 /* LiveActivityShared.swift */,
+				B3A61513E3E0BB9081C2DF56 /* Assets.xcassets */,
+				DA29923590A9AAAE45B8F419 /* Info.plist */,
 			);
 			path = EdsTabata;
 			sourceTree = "<group>";
 		};
-		86024CAD1E83101D97359D73 /* Products */ = {
+		2A166480F36D7DFE6B77E5BB /* EdsTabataWidget */ = {
 			isa = PBXGroup;
 			children = (
-				D2A57DC1D883FD21FB995169 /* EdsTabata.app */,
+				9FCB2E476A963C97C2880EC1 /* EdsTabataWidget.swift */,
+				AA095C734B954F9E52830F63 /* Info.plist */,
+			);
+			path = EdsTabataWidget;
+			sourceTree = "<group>";
+		};
+		1AB7A5EB5E114DE88C550AEA /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				7589956BF9A29865A76E2E88 /* EdsTabata.app */,
+				21A02E441C64048FA40B03E1 /* EdsTabataWidget.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -85,39 +136,61 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		42AEFBAE01D2DFD981F7DA7D /* EdsTabata */ = {
+		0517C130202793D3C0DECE5F /* EdsTabata */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 9B163AE512A6259656A74E91 /* Build configuration list for PBXNativeTarget "EdsTabata" */;
+			buildConfigurationList = F157B45FEF389474E3512EF6;
 			buildPhases = (
-				FCA229C23F166EBB0BA5029E /* Sources */,
-				DAF6AA633395B1B76148E35B /* Frameworks */,
-				943E4BBD9B51C81965501BA3 /* Resources */,
+				0759D6C2B331FEEA984517D8 /* Sources */,
+				C696C3992DCD796794A05847 /* Frameworks */,
+				C2C31BB2E483DC420A251BBC /* Resources */,
+				178435F346279A40C3D6C876 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D403E8E127F3FCE9251DF2A6 /* PBXTargetDependency */,
+			);
+			name = EdsTabata;
+			productName = EdsTabata;
+			productReference = 7589956BF9A29865A76E2E88 /* EdsTabata.app */;
+			productType = "com.apple.product-type.application";
+		};
+		CED450424B38613A325621E5 /* EdsTabataWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E7AF1A7F9A4199E0FDC90F2D;
+			buildPhases = (
+				9F83A3F0CF69A5BA2CA72666 /* Sources */,
+				36E8DE2BDA383FE748B79590 /* Frameworks */,
+				EF9D054A19C64F4350F894B0 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			name = EdsTabata;
-			productName = EdsTabata;
-			productReference = D2A57DC1D883FD21FB995169 /* EdsTabata.app */;
-			productType = "com.apple.product-type.application";
+			name = EdsTabataWidget;
+			productName = EdsTabataWidget;
+			productReference = 21A02E441C64048FA40B03E1 /* EdsTabataWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		46F86FAA6BBF9AC94A7E4595 /* Project object */ = {
+		3E64D0239AE8980B665776AA /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1500;
 				LastUpgradeCheck = 1500;
 				TargetAttributes = {
-					42AEFBAE01D2DFD981F7DA7D = {
+					0517C130202793D3C0DECE5F = {
+						CreatedOnToolsVersion = 15.0;
+					};
+					CED450424B38613A325621E5 = {
 						CreatedOnToolsVersion = 15.0;
 					};
 				};
 			};
-			buildConfigurationList = 9873F885523C5B8D7C91F5AE /* Build configuration list for PBXProject "EdsTabata" */;
+			buildConfigurationList = 5AD4C96A3F97DFE76C85A892;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = nl;
 			hasScannedForEncodings = 0;
@@ -126,49 +199,75 @@
 				nl,
 				Base,
 			);
-			mainGroup = 2B731CEFC6751AAE0EC69B98;
-			productRefGroup = 86024CAD1E83101D97359D73 /* Products */;
+			mainGroup = 6FE2ACAF1461FE7AD8E43C26;
+			productRefGroup = 1AB7A5EB5E114DE88C550AEA /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				42AEFBAE01D2DFD981F7DA7D /* EdsTabata */,
+				0517C130202793D3C0DECE5F /* EdsTabata */,
+				CED450424B38613A325621E5 /* EdsTabataWidget */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		943E4BBD9B51C81965501BA3 /* Resources */ = {
+		C2C31BB2E483DC420A251BBC /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D2F5194FE84B22D9A53E0650 /* Assets.xcassets in Resources */,
+				24C30FDD1880722BB3997422 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EF9D054A19C64F4350F894B0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		FCA229C23F166EBB0BA5029E /* Sources */ = {
+		0759D6C2B331FEEA984517D8 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				48D1420DAEF7558667575E94 /* EdsTabataApp.swift in Sources */,
-				B6481E95F245E6FBF037677E /* AppModel.swift in Sources */,
-				805A6232D3EC900D44609D82 /* Models.swift in Sources */,
-				A0866D4F98BDC2F177006174 /* BoardArt.swift in Sources */,
-				D61EE6F4AFEEC6DA520EEE37 /* Board.swift in Sources */,
-				953D2D2E46D49372764462D0 /* Sound.swift in Sources */,
-				A55376DB9A850FBEC27D5DCD /* Theme.swift in Sources */,
-				37A48C17642FAA006AE3C941 /* TimerView.swift in Sources */,
-				8F1D6D6DE14A25D01D4F7E09 /* PlanView.swift in Sources */,
-				AE807817786A98EA884014A4 /* BoardView.swift in Sources */,
+				7F43685501834A4EF59CE555 /* EdsTabataApp.swift in Sources */,
+				5C1255E0EDA61BD03403D6F8 /* AppModel.swift in Sources */,
+				3A8F07721CA737C3536036E3 /* Models.swift in Sources */,
+				F3B89EC50D383485D9BBEB29 /* BoardArt.swift in Sources */,
+				D2738779D670D4F466277E0B /* Board.swift in Sources */,
+				274DEA65F880EEF0EB1D9691 /* Sound.swift in Sources */,
+				7168866038FDB5F6E338EFC2 /* Theme.swift in Sources */,
+				AAF37CE3769A525D3E9085B9 /* TimerView.swift in Sources */,
+				8723C5FA2D4B8C82E0BE93C8 /* PlanView.swift in Sources */,
+				D7335AE4CF8DE4A0D5832FFE /* BoardView.swift in Sources */,
+				5DE476C4A23F0689A63B477B /* LiveActivityShared.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9F83A3F0CF69A5BA2CA72666 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2A4F2811D995DD5A6313E5EF /* EdsTabataWidget.swift in Sources */,
+				6F9AA9FC91C96D028A600634 /* LiveActivityShared.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		D403E8E127F3FCE9251DF2A6 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = CED450424B38613A325621E5 /* EdsTabataWidget */;
+			targetProxy = 5A3EF722437A398C1DFC36F9 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
-		2D53B50AE2273FABAAF8B8FA /* Debug */ = {
+		E6CF90468E71B18CE9684D6D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -193,7 +292,7 @@
 			};
 			name = Debug;
 		};
-		D4B2141B77146EF47E948847 /* Release */ = {
+		CE287DDE6F5A384399BB0188 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -213,7 +312,7 @@
 			};
 			name = Release;
 		};
-		FA7C752E798F561D7D156D98 /* Debug */ = {
+		34D9295D2780508FAFCF60E9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -240,7 +339,7 @@
 			};
 			name = Debug;
 		};
-		22F75101C717335ACF4089A0 /* Release */ = {
+		503CA53C45B7306AD785B977 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -267,28 +366,85 @@
 			};
 			name = Release;
 		};
+		581B4128C01240750C567BAE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = EdsTabataWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Ed’s Tabata Widget";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "nl.ed4hout.edstabata.widget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		7B14A157F4BFC7E678FE27A0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = EdsTabataWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Ed’s Tabata Widget";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "nl.ed4hout.edstabata.widget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		9873F885523C5B8D7C91F5AE /* Build configuration list for PBXProject "EdsTabata" */ = {
+		5AD4C96A3F97DFE76C85A892 = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				2D53B50AE2273FABAAF8B8FA /* Debug */,
-				D4B2141B77146EF47E948847 /* Release */,
+				E6CF90468E71B18CE9684D6D /* Debug */,
+				CE287DDE6F5A384399BB0188 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		9B163AE512A6259656A74E91 /* Build configuration list for PBXNativeTarget "EdsTabata" */ = {
+		F157B45FEF389474E3512EF6 = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				FA7C752E798F561D7D156D98 /* Debug */,
-				22F75101C717335ACF4089A0 /* Release */,
+				34D9295D2780508FAFCF60E9 /* Debug */,
+				503CA53C45B7306AD785B977 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E7AF1A7F9A4199E0FDC90F2D = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				581B4128C01240750C567BAE /* Debug */,
+				7B14A157F4BFC7E678FE27A0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = 46F86FAA6BBF9AC94A7E4595 /* Project object */;
+	rootObject = 3E64D0239AE8980B665776AA /* Project object */;
 }

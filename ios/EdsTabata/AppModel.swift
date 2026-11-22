@@ -1,10 +1,12 @@
 import SwiftUI
 import UIKit
 import Combine
+import ActivityKit
 
 final class AppModel: ObservableObject {
     let board = Board()
     let sound = SoundPlayer()
+    private let live = LiveTimer()
 
     // MARK: Settings (saved automatically)
 
@@ -190,6 +192,7 @@ final class AppModel: ObservableObject {
         sound.end()
         updateIdleTimer()
         refreshBoard()
+        live.end()
         tick &+= 1
     }
 
@@ -199,6 +202,7 @@ final class AppModel: ObservableObject {
         pausedE = total
         Store.remove("run")
         if !silent { sound.play(soundSettings.done, .done, word: looks.label(.done)) }
+        updateLive()
         sound.end()
         updateIdleTimer()
         lastKey = ""
@@ -224,6 +228,7 @@ final class AppModel: ObservableObject {
         if p.idx > lastIdx {
             if !catching { cue(segments[p.idx].phase) }
             lastIdx = p.idx
+            updateLive()
         }
         let d = display
         let key = "\(p.idx):\(d.sec)"
@@ -316,6 +321,39 @@ final class AppModel: ObservableObject {
 
     private func saveRun() {
         Store.save("run", RunState(config: config, t0: t0, pausedE: pausedE, running: running))
+        updateLive()
+    }
+
+    // MARK: Lock screen / Dynamic Island
+
+    private func liveState() -> TabataActivityAttributes.ContentState? {
+        guard !segments.isEmpty else { return nil }
+        let d = display
+        let p = position(elapsed)
+        let seg = segments[p.idx]
+        let start = t0.addingTimeInterval(cum[p.idx])
+        let end = start.addingTimeInterval(Double(seg.dur))
+        let key: LookKey = d.finished ? .done : (d.paused ? .pause : LookKey(d.phase))
+        var info: String
+        switch config.mode {
+        case .stopwatch: info = "Stopwatch"
+        case .countdown: info = "Aftellen"
+        case .emom: info = "Minuut \(d.phase == .prep ? 0 : d.round)/\(config.totalRounds)"
+        case .tabata:
+            info = "Ronde \(d.phase == .prep ? 0 : d.round)/\(config.totalRounds)"
+            if config.totalSets > 1 { info += " · Set \(d.set)/\(config.totalSets)" }
+        }
+        if d.finished { info = "Training klaar" }
+        return .init(label: d.finished ? looks.label(.done) : phaseLabel(d), colorHex: looks[key].hex,
+                     phaseStart: start, phaseEnd: end, countsUp: d.up, paused: d.paused, finished: d.finished,
+                     staticText: bigText(d), info: info)
+    }
+
+    private func updateLive() {
+        guard let st = liveState() else { return }
+        if st.finished { live.finish(st); return }
+        if !running && !st.paused { live.end(); return }
+        live.update(st)
     }
 
     private func restoreRun() {
@@ -332,10 +370,12 @@ final class AppModel: ObservableObject {
                 lastTick = .distantPast
                 startTimer()
                 updateIdleTimer()
+                updateLive()
             }
         } else {
             pausedE = r.pausedE
             refreshBoard()
+            updateLive()
         }
     }
 
@@ -437,5 +477,34 @@ final class AppModel: ObservableObject {
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) { [weak self] in
             if self?.toastID == id { self?.toast = nil }
         }
+    }
+}
+
+/// Shows the running timer on the lock screen and in the Dynamic Island.
+final class LiveTimer {
+    private var activity: Activity<TabataActivityAttributes>?
+
+    func update(_ st: TabataActivityAttributes.ContentState) {
+        let content = ActivityContent(state: st, staleDate: nil)
+        if let a = activity, a.activityState == .active {
+            Task { await a.update(content) }
+            return
+        }
+        guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
+        for old in Activity<TabataActivityAttributes>.activities { Task { await old.end(nil, dismissalPolicy: .immediate) } }
+        activity = try? Activity.request(attributes: TabataActivityAttributes(title: "Ed’s Tabata"),
+                                         content: content, pushType: nil)
+    }
+
+    func finish(_ st: TabataActivityAttributes.ContentState) {
+        guard let a = activity else { return }
+        activity = nil
+        Task { await a.end(ActivityContent(state: st, staleDate: nil), dismissalPolicy: .after(Date().addingTimeInterval(30))) }
+    }
+
+    func end() {
+        let all = Activity<TabataActivityAttributes>.activities
+        activity = nil
+        for a in all { Task { await a.end(nil, dismissalPolicy: .immediate) } }
     }
 }
