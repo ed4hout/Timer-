@@ -114,7 +114,7 @@ enum BoardArt {
         var num = "\(d.sec)"
         var sc = 3
         var y = 0
-        if d.sec > 99 || PixelFont.width(num, 3) > 27 {
+        if d.sec >= 60 || PixelFont.width(num, 3) > 27 {
             num = fmt(Double(d.sec)); sc = 2; y = 3
         }
         let nw = PixelFont.width(num, sc)
