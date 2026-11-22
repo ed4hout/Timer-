@@ -16,12 +16,12 @@
       "tintColor": "FF3B2F",
       "versions": [
         {
-          "version": "1.0.19",
-          "buildVersion": "19",
-          "date": "2026-11-21T12:22:04Z",
-          "localizedDescription": "Werk en rust tot 20:00",
+          "version": "1.0.20",
+          "buildVersion": "20",
+          "date": "2026-11-22T18:20:25Z",
+          "localizedDescription": "Nieuwe modi: Aftellen en Stopwatch",
           "downloadURL": "https://github.com/ed4hout/Timer-/releases/download/app/EdsTabata.ipa",
-          "size": 468411,
+          "size": 476316,
           "minOSVersion": "17.0"
         }
       ],
